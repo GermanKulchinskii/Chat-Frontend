@@ -1,0 +1,80 @@
+@use '../../styles/mixins/mixins/breakpoints.scss';
+
+.wrapper {
+    background-color: var(--main-gray);
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    color: var(--white);
+    
+
+    @include breakpoints.from-tablet {
+        width: 27rem;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+        border-radius: 1.5rem;
+    }
+
+    .header {
+        font-size: 2rem;
+    }
+}
+
+.inputWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+.label,
+.input {
+    width: 100%;
+    font-size: 1.5rem;
+}
+
+.input {
+    border-radius: .5rem;
+    padding: .5rem;
+    color: var(--white);
+    background-color: var(--main-gray);
+    border: .1rem solid rgba(#fff, 1.0);
+
+    &:focus {
+        border: .1rem solid rgba(#fff, .3);
+    }
+}
+
+.submitBtn {
+    margin-top: 2rem;
+    float: right;
+    width: 8rem;
+    height: 3rem;
+    border: none;
+    border-radius: .5rem;
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+        opacity: .3;
+    }
+}
+
+.refWrapper {
+    font-size: 1rem;
+}
+
+.regBtn {
+    background-color: transparent;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+
+    &:hover {
+        opacity: .3;
+    }
+}

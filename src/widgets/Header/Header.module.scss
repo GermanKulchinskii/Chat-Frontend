@@ -1,0 +1,18 @@
+@use '@/styles/mixins/mixins/breakpoints.scss';
+
+.header {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+
+  @include breakpoints.from-tablet {
+    width: 40rem;
+  }
+
+  .link {
+    color: var(--white);
+    font-weight: 600;
+  }
+}

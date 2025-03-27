@@ -1,0 +1,57 @@
+:root {
+    --custom-red-800: #ab0000;
+    --custom-purpule-200: #e1dff1;
+    --custom-purpule-250: #eceafa;
+    --custom-purpule-300: #bbb5ea;
+    --custom-purpule-500: #c5c0f0;
+    --custom-purpule-800: #4000f5;
+    --custom-blue-200: #c1e7eb;
+    --custom-blue-400: #1357be;
+    --custom-blue-800: #1c0f81;
+    --white: #fff;
+    --custom-white-300: #ebeaf4;
+    --custom-white-400: #f3f2fb;
+    --custom-gray-300: #d0cece;
+    --custom-gray-500: #727272;
+    --black: #000;
+    --black-opacity-60: rgb(0 0 0 / 60%);
+    --black-opacity-20: rgb(0 0 0 / 20%);
+    --black-opacity-80: rgb(0 0 0 / 80%);
+    --black-opacity-90: rgb(0 0 0 / 90%);
+    --main-gray: #252525;
+  
+    /* #region  /**=========== Linear =========== */
+  
+    --custom-linear-1: linear-gradient(90deg, #00d3fc 0%, #2924e4 100%);
+    --custom-linear-2: linear-gradient(90deg, #2924e4 0%, #00d3fc 100%);
+    --custom-linear-3: linear-gradient(90deg, #140ee7 22.4%, #00c5ec 100%);
+    --custom-linear-4: linear-gradient(
+      90deg,
+      rgb(41 36 228 / 50%) 0%,
+      rgb(0 211 252 / 50%) 100%
+    );
+    --custom-linear-5: linear-gradient(90deg, #4141ea 0%, #22bed3 100%);
+  
+    /* #region  /**=========== Shadows =========== */
+  
+    --custom-shadow-primary: 0 20px 40px 0 rgb(0 0 0 / 10%);
+    --custom-shadow-third: 2px 4px 10px 0 rgb(0 0 0 / 10%);
+  
+    /* #region  /**=========== fonts =========== */
+  
+    --font-primary: 'Montserrat', sans-serif;
+    --font-secondary: 'MicraC', sans-serif;
+  
+    /* #region  /**=========== z-index =========== */
+  
+    --z-navbar: 3;
+    --z-droprodown-docs: 1;
+    --z-logo-login-page: 1;
+    --z-menu: 3;
+    --z-drawer: 3;
+    --z-sidebar-tablet: 3;
+    --z-dropdown-sidebar: 3;
+    --z-widget-help: 2;
+    --z-cookie-banner: 4;
+  }
+  

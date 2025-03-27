@@ -1,0 +1,12 @@
+@use '../../styles/mixins/mixins/_breakpoints.scss';
+
+
+.bg {
+    background-color: var(--main-gray);
+
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

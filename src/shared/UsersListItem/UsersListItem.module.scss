@@ -1,0 +1,19 @@
+.listItem {
+  width: 100%;
+  border-bottom: .1rem solid var(--white);
+  cursor: pointer;
+  border-top-left-radius: .1rem;
+  border-top-right-radius: .1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  span {
+    font-size: 1.25rem;
+  }
+
+  .icon {
+    height: 90%;
+    width: auto;
+  }
+}
