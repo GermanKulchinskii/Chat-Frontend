@@ -2,11 +2,7 @@ import { ListItemButton, ListItemText } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import cl from './UsersListItem.module.scss';
 import ChatIcon from '@/assets/chat.svg?react';
-
-interface User {
-  id: number;
-  username: string;
-}
+import { User } from '@/store/Search/searchTypes';
 
 interface UsersListItem {
   user: User;

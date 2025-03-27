@@ -7,6 +7,7 @@ import BackIcon from '@/assets/back.svg?react';
 import { useCallback, useMemo } from 'react';
 import { useAppDispatch } from '@/store/store';
 import { authActions } from '@/store/Auth';
+import { searchActions } from '@/store/Search';
 
 const Header = () => {
   const dispatch = useAppDispatch();
@@ -20,13 +21,18 @@ const Header = () => {
     navigate('/login');
   }, [dispatch, navigate]);
 
+  const handleBackButton = () => {
+    dispatch(searchActions.setSelectedUsers([]));
+    dispatch(searchActions.setGroupChatSearchQuery(""));
+    navigate('/all');
+  }
+
   const isCreateChatPage = location.pathname === '/create_chat';
-  
 
   const leftIcon = useMemo(() => {
     if (isCreateChatPage) {
       return (
-        <Button className={cl.backBtn} onClick={() => navigate('/all')}>
+        <Button className={cl.backBtn} onClick={handleBackButton}>
           <BackIcon />
         </Button>
       );
