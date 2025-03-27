@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import cl from './Header.module.scss';
 import { Button } from '@mui/material';
 import LogoutIcon from '@/assets/logout.svg?react';
@@ -32,11 +32,9 @@ const Header = () => {
       );
     } else {
       return (
-        <Link to="/create_chat">
-          <Button className={cl.createChatBtn}>
-            <CreateChatIcon />
-          </Button>
-        </Link>
+        <Button className={cl.createChatBtn} onClick={() => navigate('/create_chat')}>
+          <CreateChatIcon />
+        </Button>
       );
     }
   }, [isCreateChatPage, navigate]);
