@@ -16,12 +16,6 @@ interface Chat {
   name: string;
 }
 
-interface UserSelf {
-  id: number;
-  username: string;
-  chats: Chat[];
-}
-
 interface UsersListProps {
   search: string;
 }

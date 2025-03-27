@@ -6,31 +6,22 @@ import Registration from "@/pages/Registration/Registraton";
 import All from "@/pages/All/All";
 import Chat from "@/pages/Chat/Chat";
 import CreateChat from "@/pages/CreateChat/CreateChat";
+import Layout from "@/pages/Layout/Layout";
 
 const router = createBrowserRouter([
   {
-    path: 'all',
+    path: "/",
     element: (
       <ProtectedRoute>
-        <All />
+        <Layout />
       </ProtectedRoute>
     ),
-  },
-  {
-    path: 'chat/:id',
-    element: (
-      <ProtectedRoute>
-        <Chat />
-      </ProtectedRoute>
-    )
-  },
-  {
-    path: 'create_chat',
-    element: (
-      <ProtectedRoute>
-        <CreateChat />
-      </ProtectedRoute>
-    )
+    children: [
+      { index: true, element: <All /> },
+      { path: 'all', element: <All /> },
+      { path: 'chat/:id', element: <Chat /> },
+      { path: 'create_chat', element: <CreateChat /> },
+    ]
   },
   {
     path: '/login',
