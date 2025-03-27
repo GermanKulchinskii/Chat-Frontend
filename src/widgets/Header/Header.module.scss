@@ -1,8 +1,12 @@
 @use '@/styles/mixins/mixins/breakpoints.scss';
 
+.spaceBetween {
+  justify-content: space-between !important;
+}
+
 .header {
   display: flex;
-  justify-content: end;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
   gap: 1rem;

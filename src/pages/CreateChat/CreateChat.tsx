@@ -1,8 +1,10 @@
+import Header from "@/widgets/Header/Header";
+
 const CreateChat = () => {
   return (
-    <div>
-      
-    </div>
+    <>
+      <Header />
+    </>
   );
 }
 
