@@ -11,12 +11,28 @@
   width: 100%;
   gap: 1rem;
 
+  .backBtn, .createBtn, .exitBtn {
+    padding: .3rem;
+  }
+
   @include breakpoints.from-tablet {
     width: 40rem;
+    flex: 1;
+    min-height: 4rem;
+    margin-top: 1rem;
   }
 
   .link {
     color: var(--white);
     font-weight: 600;
+  }
+
+  .icon {
+    height: auto;
+    width: 2.5rem;
+  }
+
+  .createChatBtn {
+    padding: .3rem;
   }
 }

@@ -27,19 +27,19 @@ const Header = () => {
     navigate('/all');
   }
 
-  const isCreateChatPage = location.pathname === '/create_chat';
+  const isCreateChatPage = location.pathname === '/create_chat' || location.pathname.startsWith('/chat');
 
   const leftIcon = useMemo(() => {
     if (isCreateChatPage) {
       return (
         <Button className={cl.backBtn} onClick={handleBackButton}>
-          <BackIcon />
+          <BackIcon className={cl.icon} />
         </Button>
       );
     } else {
       return (
         <Button className={cl.createChatBtn} onClick={() => navigate('/create_chat')}>
-          <CreateChatIcon />
+          <CreateChatIcon className={cl.icon} />
         </Button>
       );
     }
@@ -53,7 +53,7 @@ const Header = () => {
     <header className={headerClassName}>
       {leftIcon}
       <Button className={cl.exitBtn} onClick={logout}>
-        <LogoutIcon />
+        <LogoutIcon className={cl.icon} />
       </Button>
     </header>
   );

@@ -24,14 +24,14 @@ const CreateChat = () => {
   }, [debouncedSearch, dispatch]);
 
   return (
-    <>
+    <div className={cl.wrapper}>
       <Header />
       <section className={cl.content}>
         <GroupChatName name={name} setName={setName} />
         <SearchUsers search={search} setSearch={setSearch} />
         <GroupSearchUserList search={debouncedSearch} />
       </section>
-    </>
+    </div>
   );
 }
 

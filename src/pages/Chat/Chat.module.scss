@@ -15,4 +15,18 @@
     align-items: center;
     flex-direction: column;
   }
+
+}
+
+.nameWrapper {
+  width: 40rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+}
+
+.username {
+  color: white;
+  text-align: start;
+  padding: 0 2rem;
 }

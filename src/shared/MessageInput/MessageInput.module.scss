@@ -1,0 +1,23 @@
+.wrapper {
+  position: relative;
+
+
+  .input {
+    width: 100%;
+    max-width: 40rem;
+  }
+
+  .btn {
+    position: absolute;
+    height: 100%;
+    width: 4rem !important;
+    min-width: 0;
+    padding: .5rem;
+    right: 0;
+
+    .icon {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}

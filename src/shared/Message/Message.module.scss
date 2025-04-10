@@ -1,0 +1,31 @@
+.messageWrapper {
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 1rem;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.ownMessage {
+  background-color: #007aff; // цвет для своих сообщений, например, синий
+  color: white;
+  align-self: flex-end;
+}
+
+.otherMessage {
+  background-color: #e5e5ea; // цвет для чужих сообщений, например, светло-серый
+  color: black;
+  align-self: flex-start;
+}
+
+.messageContent {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.sentAt {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.75rem;
+  text-align: right;
+  opacity: 0.7;
+}

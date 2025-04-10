@@ -29,7 +29,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           
           const newAccessToken = result.data.refreshAccessToken.value;
           
-          // Сохраняем новый accessToken
           localStorage.setItem("accessToken", newAccessToken);
           
           dispatch(

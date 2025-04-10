@@ -1,27 +1,41 @@
-import { ListItemButton, ListItemText } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import cl from './UsersListItem.module.scss';
+import { ListItemButton, ListItemText } from '@mui/material';
 import ChatIcon from '@/assets/chat.svg?react';
 import { User } from '@/store/Search/searchTypes';
+import { Chat } from '@/widgets/UsersList/UsersList';
 
-interface UsersListItem {
-  user: User;
+export type ChatOrUser = User | Chat;
+
+export interface UsersListItemProps {
+  data: ChatOrUser;
+  onClickFunc?: (data: ChatOrUser) => void;
 }
 
-const UsersListItem = (props: UsersListItem) => {
-  const {user} = props;
-  const navigate = useNavigate();
+const isChat = (data: ChatOrUser): data is Chat => {
+  return 'name' in data && typeof (data as any).name === 'string';
+};
 
+const UsersListItem: React.FC<UsersListItemProps> = ({ data, onClickFunc }) => {
   const handleClick = () => {
-    navigate(`/chat/${user.id}`)
-  }
-  
+    if (onClickFunc) {
+      onClickFunc(data);
+    }
+  };
+
+  const displayName =
+    "username" in data
+      ? data.username
+      : isChat(data)
+      ? data.name.split(" ").at(-1) || "Чат"
+      : "Чат";
+
   return (
-    <ListItemButton onClick={handleClick} className={cl.listItem}>
-      <ListItemText primary={user.username} />
+    <ListItemButton className={cl.listItem} onClick={handleClick}>
+      <ListItemText primary={displayName} />
       <ChatIcon className={cl.icon} />
     </ListItemButton>
   );
-}
+};
 
 export default UsersListItem;

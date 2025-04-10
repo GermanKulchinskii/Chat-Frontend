@@ -86,7 +86,15 @@ export const authApi = apiSlice.injectEndpoints({
           current: {
             id: number;
             username: string;
-            chats: { id: number; name: string }[];
+            chats: { 
+              id: number; 
+              name: string, 
+              isGroup: boolean,
+              chatmembers: {
+                id: number,
+                username: string,
+              }[]
+            }[];
           }
         }
       },
@@ -102,6 +110,11 @@ export const authApi = apiSlice.injectEndpoints({
                 chats {
                   id
                   name
+                  isGroup
+                  chatmembers {
+                    id
+                    username
+                  }
                 }
               }
             }

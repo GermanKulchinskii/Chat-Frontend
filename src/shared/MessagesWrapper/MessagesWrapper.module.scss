@@ -1,0 +1,17 @@
+.wrapper {
+  position: relative;
+  overflow-y: auto;
+  height: 100%;
+  padding: 1rem;
+}
+
+.sentinel {
+  height: 1px;
+  opacity: 0;
+}
+
+.messagesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

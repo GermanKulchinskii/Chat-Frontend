@@ -14,7 +14,7 @@ const Registration: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const [register, { data, error, isLoading }] = useRegisterMutation();
+  const [register, { error, isLoading }] = useRegisterMutation();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +51,7 @@ const Registration: React.FC = () => {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
-      dispatch(authActions.loginSuccess({ accessToken, refreshToken }));
+      dispatch(authActions.loginSuccess({ accessToken, refreshToken, username }));
       
       navigate("/");
     })
