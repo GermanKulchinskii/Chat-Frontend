@@ -1,5 +1,5 @@
 import cl from './PrivateChat.module.scss';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Message } from '@/store/Chat/chatTypes';
 import { useLazyGetChatQuery } from '@/services/chatApi';
 import useChatWebSocket from '@/hooks/useChatWebSocket';
@@ -13,42 +13,52 @@ interface PrivateChatProps {
   chatId: number;
   currentUserId: number;
   currentUserName?: string;
-  isError: any,
-  isFetching: any,
+  isError: any;
+  isFetching: any;
+  initialMessages: Message[];
 }
 
 const PrivateChat = ({
   chatName,
   currentUserId,
-  currentUserName,
   secondUserName,
   chatId,
+  initialMessages,
+  isError,
+  isFetching,
 }: PrivateChatProps) => {
   const token = localStorage.getItem('accessToken') || '';
 
-  // Сообщения, загруженные через API (история чата)
-  const [olderMessages, setOlderMessages] = useState<Message[]>([]);
+  console.log("PrivateChat.tsx");
+
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [noMoreMessages, setNoMoreMessages] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  const [fetchChat, { isError, isFetching }] = useLazyGetChatQuery();
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
 
-  // Сообщения из WebSocket
+  const [fetchChat, { isError: isErrorFetching, isFetching: isFetchingChat }] = useLazyGetChatQuery();
+
   const { messages: wsMessages, sendMessage } = useChatWebSocket({
     chatId,
     token,
+    currentUserId,
   });
 
-  // Объединяем сообщения API и WebSocket
-  const combinedMessages = [...olderMessages, ...wsMessages];
+  // Объединяем сообщения того, что получены через API и WebSocket
+  const combinedMessages = [...messages, ...wsMessages];
 
-  // Если необходимо, можно отсортировать по времени отправки
-  combinedMessages.sort(
-    (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
-  );
+  // Сортировка по времени отправки с проверкой поля sentAt
+  combinedMessages.sort((a, b) => {
+    const timeA = a.sentAt ? new Date(a.sentAt).getTime() : 0;
+    const timeB = b.sentAt ? new Date(b.sentAt).getTime() : 0;
+    return timeA - timeB;
+  });
 
-  // Разделяем на доставленные и ожидающие доставки (pending)
+  // Разделяем сообщения на доставленные и pending
   const deliveredMessages = combinedMessages.filter(
     (msg) => msg.status !== "pending"
   );
@@ -59,14 +69,15 @@ const PrivateChat = ({
   const requestMessages = () => {
     if (!chatId || noMoreMessages || loadingOlder) return;
     setLoadingOlder(true);
-    fetchChat({ chatId, offset: olderMessages.length, limit: 10 })
+    fetchChat({ chatId, offset: messages.length, limit: 10 })
       .unwrap()
       .then((result) => {
         const fetched: Message[] = result.data?.getChat?.messages ?? [];
         if (fetched.length === 0) {
           setNoMoreMessages(true);
         } else {
-          setOlderMessages((prev) => [...fetched, ...prev]);
+          // Новая порция добавляется в начало списка
+          setMessages((prev) => [...fetched, ...prev]);
         }
       })
       .catch((err) => console.error("Error fetching older messages:", err))
@@ -75,9 +86,8 @@ const PrivateChat = ({
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
-      // Отправка сообщения через WS-хук, который добавит локальную запись со статусом pending
       sendMessage(inputValue, currentUserId);
-      setInputValue('');
+      setInputValue("");
     }
   };
 
@@ -92,8 +102,8 @@ const PrivateChat = ({
           sendingMessages={pendingMessages}
           requestMessages={requestMessages}
           currentUserId={currentUserId}
-          isError={isError}
-          isFetching={isFetching || loadingOlder}
+          isError={isError || isErrorFetching}
+          isFetching={isFetching || isFetchingChat || loadingOlder}
         />
       </div>
       <div className={cl.inputWrapper}>

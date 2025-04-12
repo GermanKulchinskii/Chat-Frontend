@@ -1,4 +1,3 @@
-
 import { useCurrentQuery } from '@/services/authApi';
 import { useStartOrGetPrivateChatMutation } from '@/services/chatApi';
 import { authActions } from '@/store/Auth';
@@ -17,17 +16,19 @@ const Chats = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
 
+  console.log("Chat.tsx");
+
   // Инфа о чате
   const chatId = useSelector(chatIdSelector);
   const chatName = useSelector(chatNameSelector);
-  const secondUserName = useSelector(secondUserNameSelector) || chatName?.split(' ').at(-1);
+  const secondUserName = useSelector(secondUserNameSelector) || "Чат";
   const secondUserId = useSelector(secondUserIdSelector) || Number(location.pathname.split('/').at(-1));
 
   // Инфа о текущем юзере
   const username = useSelector(usernameSelector);
   const userId = useSelector(userIdSelector);
 
-  // Не факт, что будет айдишник юзера
+  // Получение текущего пользователя (если его ещё нет)
   const {
     data: currentData,
     isFetching: isFetchingCurrent,
@@ -44,7 +45,7 @@ const Chats = () => {
       dispatch(authActions.setUserInfo({
         username: currentUser.username,
         userId: currentUser.id,
-      }))
+      }));
     }
   }, [currentData, dispatch]);
 
@@ -55,12 +56,23 @@ const Chats = () => {
       startOrGetPrivateChat({ secondUserId: secondUserId });
     }
   }, [username, userId, startOrGetPrivateChat, secondUserId]);
+  
+  const getChatDisplayName = (chatName: string, currentUserName: string | undefined) => {
+    const matches = chatName.match(/Чат между (\S+) и (\S+)/);
+    if (matches) {
+      const [, name1, name2] = matches;
+      return name1 === currentUserName ? name2 : name1;
+    }
+    return "чат";
+  };
 
   useEffect(() => {
     if (data?.data?.startOrGetPrivateChat) {
       const chatData = data.data.startOrGetPrivateChat;
-      dispatch(chatActions.setChatId({ chatId: chatData.id }))
-      dispatch(chatActions.setChatName({ chatName: chatData.name }))
+      dispatch(chatActions.setChatId({ chatId: chatData.id }));
+      dispatch(chatActions.setChatName({ chatName: chatData.name }));
+
+      dispatch(chatActions.setChatInfo({ secondUserName: getChatDisplayName(chatData.name, username) }))
     }
   }, [data, dispatch]);
 
@@ -86,6 +98,7 @@ const Chats = () => {
           currentUserId={userId!}
           isError={isErrorCurrent || isError}
           isFetching={isFetchingCurrent || isLoading}
+          initialMessages={data?.data?.startOrGetPrivateChat?.messages || []}
         />
       )}
     </>

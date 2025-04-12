@@ -18,10 +18,10 @@ const chatSlice = createSlice({
         secondUserName?: string, 
       }>
     ) => {
-      state.chatId = action.payload.chatId;
-      state.chatName = action.payload.chatName;
-      state.secondUserId = action.payload.secondUserId;
-      state.secondUserName = action.payload.secondUserName;
+      state.chatId = action.payload.chatId ? action.payload.chatId : state.chatId;
+      state.chatName = action.payload.chatName ? action.payload.chatName : state.chatName;
+      state.secondUserId = action.payload.secondUserId ? action.payload.secondUserId : state.secondUserId;
+      state.secondUserName = action.payload.secondUserName ? action.payload.secondUserName : state.secondUserName;
     },
     setChatId: (state, action: PayloadAction<{ chatId: number }>) => {
       state.chatId = action.payload.chatId;

@@ -9,6 +9,7 @@ export const chatApi = apiSlice.injectEndpoints({
           startOrGetPrivateChat: { 
             id: number, 
             name: string,
+            messages: Message[]
           }
         }
       },
@@ -21,6 +22,12 @@ export const chatApi = apiSlice.injectEndpoints({
               startOrGetPrivateChat(secondUserId: $secondUserId) {
                 id
                 name
+                messages {
+                  id
+                  senderId
+                  content
+                  sentAt
+                }
               }
             }
           `,

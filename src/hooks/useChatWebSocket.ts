@@ -6,12 +6,14 @@ export interface UseChatWebSocketOptions {
   token: string;
   initialMessages?: Message[];
   wsUrl?: string;
+  currentUserId: number;
 }
 
 const useChatWebSocket = ({
   chatId,
   token,
   initialMessages = [],
+  currentUserId,
   wsUrl = "ws://localhost:8000/ws",
 }: UseChatWebSocketOptions) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -19,31 +21,45 @@ const useChatWebSocket = ({
 
   useEffect(() => {
     if (!token || !chatId) return;
-    const url = `${wsUrl}?token=Bearer%20${token}`;
-    ws.current = new WebSocket(url);
 
-    ws.current.onopen = () => {
-      console.log("WebSocket connected");
-    };
+    const url = `${wsUrl}?token=Bearer%20${token}&chat_id=${chatId}`;
+    ws.current = new WebSocket(url);
 
     ws.current.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        // Если сервер возвращает статус (например, "sending" или "delivered")
-        if (data.status) {
-          if (data.status === "delivered") {
-            // При получении подтверждения обновляем все сообщения со статусом "pending"
-            setMessages(prev =>
-              prev.map(msg => (msg.status === "pending" ? { ...msg, status: "delivered" } : msg))
+        console.log("WS received:", data);
+
+        // Если получено подтверждение доставки вашего отправленного сообщения:
+        if (data.type === "confirmation") {
+          setMessages((prev) => {
+            // Ищем сообщение с состоянием "pending", совпадающее по senderId и content.
+            const index = prev.findIndex(
+              (msg) =>
+                msg.status === "pending" &&
+                msg.senderId === currentUserId &&
+                msg.content === data.content
             );
-          }
+            if (index !== -1) {
+              // Обновляем найденное сообщение новыми данными из сервера.
+              const updatedMessage = { ...prev[index], ...data, messageType: "confirmation" };
+              const updatedMessages = [...prev];
+              updatedMessages[index] = updatedMessage;
+              return updatedMessages;
+            }
+            return prev;
+          });
         }
-        // Если получено сообщение с данными (например, от другого пользователя)
+        // Если получено новое входящее сообщение от собеседника:
+        else if (data.type === "message") {
+          setMessages((prev) => [...prev, { ...data, messageType: "incoming" }]);
+        }
+        // Обработка fallback, если поле type отсутствует:
         else if (data.chat_id && data.content) {
-          setMessages(prev => [...prev, data]);
+          setMessages((prev) => [...prev, { ...data, messageType: "unknown" }]);
         }
       } catch (error) {
-        console.error("Error parsing WebSocket message", error);
+        console.error("Ошибка разбора WS-сообщения", error);
       }
     };
 
@@ -58,22 +74,22 @@ const useChatWebSocket = ({
     return () => {
       ws.current?.close();
     };
-  }, [token, chatId, wsUrl]);
+  }, [token, chatId, wsUrl, currentUserId]);
 
   const sendMessage = useCallback((content: string, senderId: number) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      // Создаем локальное сообщение с временным идентификатором и статусом "pending"
-      const newMessage: Message = {
-        id: Date.now(), // используется временное значение; на сервере может быть своя генерация id
+      const pendingMessage: Message = {
+        id: Date.now(),
         senderId,
         content,
         chat_id: chatId,
         sentAt: new Date().toISOString(),
         status: "pending",
       };
-      setMessages(prev => [...prev, newMessage]);
-      // Отправляем полезную нагрузку на сервер
+      setMessages((prev) => [...prev, pendingMessage]);
+
       const payload = { content, chat_id: chatId };
+      console.log("WS: Отправка сообщения", payload);
       ws.current.send(JSON.stringify(payload));
     }
   }, [chatId]);

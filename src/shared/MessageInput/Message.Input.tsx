@@ -1,6 +1,7 @@
 import { Button, TextField } from '@mui/material';
 import cl from './MessageInput.module.scss';
 import SendIcon from '@/assets/send_message.svg?react';
+import React from 'react';
 
 interface MessageInputProps {
   value: string;
@@ -77,4 +78,4 @@ const MessageInput = (props: MessageInputProps) => {
   );
 };
 
-export default MessageInput;
+export default React.memo(MessageInput);
