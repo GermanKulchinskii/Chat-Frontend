@@ -1,31 +1,38 @@
 .messageWrapper {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem 1rem 1rem;
   margin-bottom: 0.5rem;
-  border-radius: 1rem;
   max-width: 80%;
   word-wrap: break-word;
+  position: relative;
+  max-width: 85%;
 }
 
 .ownMessage {
-  background-color: #007aff; // цвет для своих сообщений, например, синий
+  background-color: #007aff;
   color: white;
   align-self: flex-end;
+  border-radius: 1rem 1rem 0 1rem;
 }
 
 .otherMessage {
-  background-color: #e5e5ea; // цвет для чужих сообщений, например, светло-серый
+  background-color: #e5e5ea;
   color: black;
   align-self: flex-start;
+  border-radius: 1rem 1rem 1rem 0rem;
 }
 
 .messageContent {
   margin: 0;
   font-size: 1rem;
+  white-space: pre-line;
 }
 
 .sentAt {
-  margin: 0.25rem 0 0 0;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   text-align: right;
   opacity: 0.7;
+  position: absolute;
+  bottom: .1rem;
+  right: .5rem;
+  pointer-events: none;
 }

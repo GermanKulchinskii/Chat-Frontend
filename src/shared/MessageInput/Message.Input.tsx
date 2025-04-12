@@ -1,34 +1,38 @@
+import React, { useState, useCallback } from 'react';
 import { Button, TextField } from '@mui/material';
 import cl from './MessageInput.module.scss';
 import SendIcon from '@/assets/send_message.svg?react';
-import React from 'react';
 
 interface MessageInputProps {
-  value: string;
-  setValue: React.Dispatch<React.SetStateAction<string>>;
-  onSubmit: () => void;
+  onSubmit: (value: string) => void;
 }
 
-const MessageInput = (props: MessageInputProps) => {
-  const { value, setValue, onSubmit } = props;
+const MessageInput = React.memo(({ onSubmit }: MessageInputProps) => {
+  const [value, setValue] = useState("");
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!value.trim()) return;
-    onSubmit();
-  };
+    onSubmit(value);
+    setValue("");
+  }, [value, onSubmit]);
 
-  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleEnter = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (value.trim() !== '') {
+      if (value.trim()) {
         handleSubmit();
       }
     }
-  };
+  }, [value, handleSubmit]);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+  }, []);
 
   return (
     <div className={cl.wrapper}>
       <TextField 
+        size='medium'
         label="Сообщение"
         variant="outlined"
         id="search"
@@ -37,38 +41,23 @@ const MessageInput = (props: MessageInputProps) => {
         maxRows={10}
         multiline
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleEnter}
         sx={{
-          textArea: {
-            width: '87%'
-          },
-          input: {
-            color: 'white',
-            fontSize: '1.25rem',
-          },
-          '& .MuiInputBase-input': {
+          textArea: { width: '87%' },
+          input: { color: 'white', fontSize: '1.25rem' },
+          '& .MuiInputBase-input': { 
             color: 'white',
             fontSize: '1.25rem',
             whiteSpace: 'pre-wrap',
           },
           '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderColor: 'white',
-            },
-            '&:hover fieldset': {
-              borderColor: 'white',
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: 'white',
-            },
+            '& fieldset': { borderColor: 'white' },
+            '&:hover fieldset': { borderColor: 'white' },
+            '&.Mui-focused fieldset': { borderColor: 'white' },
           },
-          '& .MuiInputLabel-root': {
-            color: 'white',
-          },
-          '& .MuiInputLabel-root.Mui-focused': {
-            color: 'white',
-          },
+          '& .MuiInputLabel-root': { color: 'white' },
+          '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
         }}
       />
       <Button className={cl.btn} onClick={handleSubmit}>
@@ -76,6 +65,6 @@ const MessageInput = (props: MessageInputProps) => {
       </Button>
     </div>
   );
-};
+});
 
-export default React.memo(MessageInput);
+export default MessageInput;

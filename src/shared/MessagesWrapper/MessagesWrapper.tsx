@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { Message as MessageType } from '@/store/Chat/chatTypes';
 import cl from './MessagesWrapper.module.scss';
 import Message from '@/shared/Message/Message';
 
-interface MessagesWrapperProps {
+interface ChatMessagesProps {
   messages: MessageType[];
   sendingMessages: MessageType[];
   requestMessages: () => void;
@@ -12,29 +12,46 @@ interface MessagesWrapperProps {
   isFetching: boolean;
 }
 
-const MessagesWrapper = (props: MessagesWrapperProps) => {
+const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
   const { isError, isFetching, messages, sendingMessages, requestMessages, currentUserId } = props;
+  
+  const combinedMessages = useMemo(() => {
+    const allMessages = [...messages, ...sendingMessages];
+    return allMessages.sort((a, b) => {
+      const timeA = a.sentAt ? new Date(a.sentAt).getTime() : 0;
+      const timeB = b.sentAt ? new Date(b.sentAt).getTime() : 0;
+      return timeA - timeB;
+    });
+  }, [messages, sendingMessages]);
+
   const observerRef = useRef<HTMLDivElement | null>(null);
+  // Флаг нужен для исполнения эффекта прокрута вниз единожды
+  const scrollFlag = useRef(false);
+  // Сам элемент, который крутим
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  // Флаг, чтобы выполнить автоскролл только один раз при первом монтировании.
-  const hasScrolledInitial = useRef(false);
 
-  console.log("MessageWrapper.tsx");
+  useEffect(() => {
+    if (!scrollFlag.current && wrapperRef.current && combinedMessages.length) {
+      wrapperRef.current.scrollTo(0, wrapperRef.current.scrollHeight);
+      scrollFlag.current = true;
+      return;
+    }
 
-  // IntersectionObserver для подгрузки старых сообщений
+    if (wrapperRef.current && combinedMessages.length && combinedMessages.at(-1)!.senderId === currentUserId) {
+      wrapperRef.current.scrollTo(0, wrapperRef.current.scrollHeight);
+    }
+  }, [combinedMessages])
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !isError && isFetching) {
+          if (entry.isIntersecting && !isError && !isFetching) {
             requestMessages();
           }
         });
       },
-      {
-        root: null,
-        threshold: 0.1,
-      }
+      { root: null, threshold: 0.1 }
     );
 
     if (observerRef.current) {
@@ -47,22 +64,6 @@ const MessagesWrapper = (props: MessagesWrapperProps) => {
       }
     };
   }, [requestMessages, isError, isFetching]);
-
-  const combinedMessages = [...messages, ...sendingMessages];
-  combinedMessages.sort((a, b) => {
-    const timeA = a.sentAt ? new Date(a.sentAt).getTime() : 0;
-    const timeB = b.sentAt ? new Date(b.sentAt).getTime() : 0;
-    return timeA - timeB;
-  });
-
-  useEffect(() => {
-    if (!hasScrolledInitial.current && wrapperRef.current && messages.length > 0) {
-      wrapperRef.current.scrollTo({
-        top: wrapperRef.current.scrollHeight,
-      });
-      hasScrolledInitial.current = true;
-    }
-  }, [messages]);
 
   return (
     <div className={cl.wrapper} ref={wrapperRef}>
@@ -81,4 +82,4 @@ const MessagesWrapper = (props: MessagesWrapperProps) => {
   );
 };
 
-export default MessagesWrapper;
+export default React.memo(MessagesWrapper);

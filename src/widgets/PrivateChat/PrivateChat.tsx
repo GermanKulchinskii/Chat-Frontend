@@ -1,5 +1,5 @@
 import cl from './PrivateChat.module.scss';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Message } from '@/store/Chat/chatTypes';
 import { useLazyGetChatQuery } from '@/services/chatApi';
 import useChatWebSocket from '@/hooks/useChatWebSocket';
@@ -34,7 +34,6 @@ const PrivateChat = ({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [noMoreMessages, setNoMoreMessages] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
-  const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
     setMessages(initialMessages);
@@ -48,25 +47,18 @@ const PrivateChat = ({
     currentUserId,
   });
 
-  // Объединяем сообщения того, что получены через API и WebSocket
-  const combinedMessages = [...messages, ...wsMessages];
-
-  // Сортировка по времени отправки с проверкой поля sentAt
-  combinedMessages.sort((a, b) => {
-    const timeA = a.sentAt ? new Date(a.sentAt).getTime() : 0;
-    const timeB = b.sentAt ? new Date(b.sentAt).getTime() : 0;
-    return timeA - timeB;
-  });
-
-  // Разделяем сообщения на доставленные и pending
-  const deliveredMessages = combinedMessages.filter(
-    (msg) => msg.status !== "pending"
+  // Объединяем сообщения из API и WebSocket
+  const combinedMessages = useMemo(() => [...messages, ...wsMessages], [messages, wsMessages]);
+  const deliveredMessages = useMemo(
+    () => combinedMessages.filter((msg) => msg.status !== "pending"),
+    [combinedMessages]
   );
-  const pendingMessages = combinedMessages.filter(
-    (msg) => msg.status === "pending"
+  const pendingMessages = useMemo(
+    () => combinedMessages.filter((msg) => msg.status === "pending"),
+    [combinedMessages]
   );
 
-  const requestMessages = () => {
+  const requestMessages = useCallback(() => {
     if (!chatId || noMoreMessages || loadingOlder) return;
     setLoadingOlder(true);
     fetchChat({ chatId, offset: messages.length, limit: 10 })
@@ -76,20 +68,19 @@ const PrivateChat = ({
         if (fetched.length === 0) {
           setNoMoreMessages(true);
         } else {
-          // Новая порция добавляется в начало списка
           setMessages((prev) => [...fetched, ...prev]);
         }
       })
       .catch((err) => console.error("Error fetching older messages:", err))
       .finally(() => setLoadingOlder(false));
-  };
+  }, [chatId, noMoreMessages, loadingOlder, fetchChat, messages.length]);
 
-  const handleSendMessage = () => {
-    if (inputValue.trim()) {
-      sendMessage(inputValue, currentUserId);
-      setInputValue("");
+  // onSubmit для MessageInput теперь получает значение сообщения и вызывает sendMessage
+  const handleSendMessage = useCallback((msg: string) => {
+    if (msg.trim()) {
+      sendMessage(msg, currentUserId);
     }
-  };
+  }, [sendMessage, currentUserId]);
 
   return (
     <div className={cl.widget}>
@@ -107,11 +98,7 @@ const PrivateChat = ({
         />
       </div>
       <div className={cl.inputWrapper}>
-        <MessageInput 
-          value={inputValue} 
-          setValue={setInputValue} 
-          onSubmit={handleSendMessage} 
-        />
+        <MessageInput onSubmit={handleSendMessage} />
       </div>
     </div>
   );

@@ -18,7 +18,8 @@
   @include breakpoints.from-tablet {
     width: 40rem;
     flex: 1;
-    min-height: 4rem;
+    height: 4vh;
+    min-height: 40px;
     margin-top: 1rem;
   }
 

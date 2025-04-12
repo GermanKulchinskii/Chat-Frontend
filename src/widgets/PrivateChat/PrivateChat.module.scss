@@ -9,7 +9,7 @@
 
   @include breakpoints.from-tablet {
     width: 40rem;
-    height: 86vh;
+    height: 88vh;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
     border-radius: 0.4rem;
     position: relative;
@@ -21,24 +21,24 @@
     color: white;
     padding-bottom: 0.5rem;
     border-bottom: .13rem solid var(--white);
-    margin-top: 2rem;
+    margin-top: 1rem;
+    height: 6%;
+    min-height: 40px;
   }
 
   .chatWrapper {
-    width: 90%;
-    height: 70vh;
-    max-height: 70vh;
+    width: 96%;
+    height: 80%;
     overflow-x: hidden;
     overflow-y: scroll;
     overflow-y: auto;
+    min-height: 150px;
   }
 
   .inputWrapper {
-    position: absolute;
-    bottom: 2rem;
-    margin-top: 2rem;
     width: 90%;
     height: auto;
     color: white;
+    min-height: 50px;
   }
 }
