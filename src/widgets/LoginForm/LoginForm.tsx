@@ -1,29 +1,41 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { LoginFormProps } from "./types";
 import cl from './LoginForm.module.scss';
 
 const LoginForm: React.FC<LoginFormProps> = ({
-  loginValue,
-  setLoginValue,
-  password,
-  setPassword,
-  validationError,
   loading,
   error,
   handleLogin,
 }) => {
+  const [loginValue, setLoginValue] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [validationError, setValidationError] = useState<string>("");
+
+  const onChangeLogin = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoginValue(e.target.value);
+  }, [setLoginValue]);
+
+  const onChangePassword = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+  }, []);
+
+  const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleLogin(loginValue, password, () => setValidationError(""));
+  }, [loginValue, password, handleLogin]);
+
   return (
     <div className={cl.wrapper}>
       <h2 className={cl.header}>Вход</h2>
-      <form onSubmit={handleLogin}>
+      <form onSubmit={onSubmit}>
         <div className={cl.inputWrapper}>
           <label htmlFor="login" className={cl.label}>Логин:</label>
           <input
             id="login"
             type="text"
             value={loginValue}
-            onChange={(e) => setLoginValue(e.target.value)}
+            onChange={onChangeLogin}
             required
             className={cl.input}
           />
@@ -34,7 +46,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             id="password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={onChangePassword}
             required
             className={cl.input}
           />
@@ -63,4 +75,4 @@ const LoginForm: React.FC<LoginFormProps> = ({
   );
 };
 
-export default LoginForm;
+export default React.memo(LoginForm);
