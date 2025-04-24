@@ -1,10 +1,12 @@
 import cl from './PrivateChat.module.scss';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Message } from '@/store/Chat/chatTypes';
 import { useLazyGetChatQuery } from '@/services/chatApi';
 import useChatWebSocket from '@/hooks/useChatWebSocket';
 import MessageInput from '@/shared/MessageInput/Message.Input';
 import MessagesWrapper from '@/shared/MessagesWrapper/MessagesWrapper';
+import MoreIcon from '@/assets/more_icon.svg?react';
+import { Button } from '@mui/material';
 
 interface PrivateChatProps {
   chatName?: string;
@@ -34,6 +36,8 @@ const PrivateChat = ({
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [noMoreMessages, setNoMoreMessages] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  const [isDeleteBtn, setIsDeleteBtn] = useState(false);
+  const deleteBtnRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMessages(initialMessages);
@@ -47,7 +51,6 @@ const PrivateChat = ({
     currentUserId,
   });
 
-  // Объединяем сообщения из API и WebSocket
   const combinedMessages = useMemo(() => [...messages, ...wsMessages], [messages, wsMessages]);
   const deliveredMessages = useMemo(
     () => combinedMessages.filter((msg) => msg.status !== "pending"),
@@ -75,17 +78,41 @@ const PrivateChat = ({
       .finally(() => setLoadingOlder(false));
   }, [chatId, noMoreMessages, loadingOlder, fetchChat, messages.length]);
 
-  // onSubmit для MessageInput теперь получает значение сообщения и вызывает sendMessage
   const handleSendMessage = useCallback((msg: string) => {
     if (msg.trim()) {
       sendMessage(msg, currentUserId);
     }
   }, [sendMessage, currentUserId]);
 
+  const toggleDeleteBtn = useCallback(() => {
+    setIsDeleteBtn(prev => !prev);
+  }, [setIsDeleteBtn]);
+
+  useEffect(() => {
+    if (!isDeleteBtn) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (deleteBtnRef.current && !deleteBtnRef.current.contains(e.target as Node)) {
+        setIsDeleteBtn(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDeleteBtn]);
+
   return (
     <div className={cl.widget}>
       <div className={cl.header}>
         <p className={cl.username}>{secondUserName || chatName}</p>
+        <Button className={cl.iconBtn} onClick={toggleDeleteBtn} onMouseDown={(e) => e.stopPropagation()}>
+          <MoreIcon className={cl.icon} />
+        </Button>
+        {isDeleteBtn &&
+          <div className={cl.deleteOption} ref={deleteBtnRef}>
+            <Button className={cl.btn}>Удалить чат?</Button>
+          </div>
+        }
       </div>
       <div className={cl.chatWrapper}>
         <MessagesWrapper 

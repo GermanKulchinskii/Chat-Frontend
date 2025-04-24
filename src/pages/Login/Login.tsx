@@ -11,7 +11,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [validationError, setValidationError] = useState<string>("");
   const navigate = useNavigate();
-
+  
   const [loginMutation, { loading, error }] = useMutation<
     LoginData,
     LoginVars

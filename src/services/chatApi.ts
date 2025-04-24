@@ -1,5 +1,6 @@
 import { apiSlice } from "@/services/graphqlApi";
 import { Message } from "@/store/Chat/chatTypes";
+import { ChatCreationData, ChatDetails } from "./types";
 
 export const chatApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -67,11 +68,48 @@ export const chatApi = apiSlice.injectEndpoints({
         },
       }),
     }),
+    deleteChat: builder.mutation<
+      void,
+      { chatId: number }
+    >({
+      query: ({ chatId }) => ({
+        body: {
+          query: `
+            mutation deleteChat($chatId: int!) {
+              deleteChat(chatId: $chatId) {
+              }
+            }
+          `,
+          variables: { chatId },
+        }
+      }),
+    }),
+    startGroupChat: builder.mutation<
+      ChatDetails,
+      ChatCreationData
+    >({
+      query: (creationData: ChatCreationData) => ({
+        body: {
+          query: `
+            mutation startGroupChat($creationData: ChatCreationData!) {
+              startGroupChat(creationData: $creationData) {
+                id
+                name
+              }
+            }
+          `,
+          variables: { creationData },
+        }
+      }),
+    }),
+    
   }),
   overrideExisting: false,
 });
 
 export const { 
   useStartOrGetPrivateChatMutation, 
-  useLazyGetChatQuery 
+  useLazyGetChatQuery,
+  useDeleteChatMutation,
+  useStartGroupChatMutation,
 } = chatApi;

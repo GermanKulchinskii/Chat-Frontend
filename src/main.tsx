@@ -9,6 +9,7 @@ import AppRoutes from './router/router.tsx';
 import './styles/globals.scss';
 import { Provider } from 'react-redux';
 import { createReduxStore } from './store/store.ts';
+import { ToastContainer } from 'react-toastify';
 
 const store = createReduxStore();
 
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')!).render(
         <ThemeProvider theme={theme}>
           <CssBaseline />
             <AppRoutes />
+            <ToastContainer />
         </ThemeProvider>
       </Provider>
     </ApolloWrapper>

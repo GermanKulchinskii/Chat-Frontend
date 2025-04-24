@@ -1,3 +1,4 @@
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useCurrentQuery } from '@/services/authApi';
 import { useStartOrGetPrivateChatMutation } from '@/services/chatApi';
 import { authActions } from '@/store/Auth';
@@ -16,38 +17,14 @@ const Chats = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
 
-  console.log("Chat.tsx");
-
   // Инфа о чате
   const chatId = useSelector(chatIdSelector);
   const chatName = useSelector(chatNameSelector);
   const secondUserName = useSelector(secondUserNameSelector) || "Чат";
   const secondUserId = useSelector(secondUserIdSelector) || Number(location.pathname.split('/').at(-1));
 
-  // Инфа о текущем юзере
-  const username = useSelector(usernameSelector);
-  const userId = useSelector(userIdSelector);
-
   // Получение текущего пользователя (если его ещё нет)
-  const {
-    data: currentData,
-    isFetching: isFetchingCurrent,
-    isError: isErrorCurrent,
-  } = useCurrentQuery(undefined, 
-    { 
-      skip: !!userId,
-      refetchOnMountOrArgChange: true,
-    });
-
-  useEffect(() => {
-    if (currentData && currentData.data && currentData.data.current) {
-      const currentUser = currentData.data.current;
-      dispatch(authActions.setUserInfo({
-        username: currentUser.username,
-        userId: currentUser.id,
-      }));
-    }
-  }, [currentData, dispatch]);
+  const { userId, username, isFetching: isFetchingCurrent, isError: isErrorCurrent } = useCurrentUser();
 
   const [startOrGetPrivateChat, { data, isError, isLoading }] = useStartOrGetPrivateChatMutation();
 

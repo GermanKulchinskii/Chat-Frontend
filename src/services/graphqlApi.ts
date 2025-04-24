@@ -11,9 +11,7 @@ import {
 const SERVER_URL = 'http://localhost:8000/graphql';
 const mutex = new Mutex();
 
-// Определяем интерфейс для объекта GraphQL-запроса.
-// Он расширяет FetchArgs (за исключением body, чтобы задать свою структуру) и делает
-// url и method необязательными, поскольку мы будем задавать их по умолчанию.
+// Интерфейс для GraphQL-запроса.
 interface GraphQLArgs extends Partial<Omit<FetchArgs, 'body'>> {
   body: {
     query: string;
@@ -21,14 +19,11 @@ interface GraphQLArgs extends Partial<Omit<FetchArgs, 'body'>> {
   };
 }
 
-// Функция prepareArgs принимает аргумент, который может быть строкой,
-// объектом типа FetchArgs или объектом GraphQLArgs.
-// Если передан объект с body, мы задаём url и method по умолчанию (если их нет).
+// Функция prepareArgs позволяет задать url и method по умолчанию.
 const prepareArgs = (
   args: string | FetchArgs | GraphQLArgs
 ): string | FetchArgs => {
   if (typeof args === 'object' && 'body' in args) {
-    // Приводим args к нашему интерфейсу GraphQLArgs
     const { body, ...rest } = args as GraphQLArgs;
     return {
       ...rest,
@@ -58,23 +53,29 @@ const graphqlBaseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  // Ждем, если сейчас происходит обновление токена
+  // Ждем, если идёт обновление токена
   await mutex.waitForUnlock();
 
   let result = await graphqlBaseQueryRaw(prepareArgs(args), api, extraOptions);
 
-  if (result.error && result.error.status === 401) {
-    // Если получена ошибка авторизации, пытаемся обновить токен
+  // Проверяем, что либо сервер вернул HTTP 401, либо в ответе есть ошибка с сообщением "401: ..."
+  const isTokenInvalid =
+    (result.error && result.error.status === 401) ||
+    (result.data &&
+      (result.data as any).errors &&
+      (result.data as any).errors.some((err: any) => typeof err.message === 'string' && err.message.startsWith('401:')));
+
+  if (isTokenInvalid) {
     if (!mutex.isLocked()) {
       const release = await mutex.acquire();
       try {
         const refreshToken = localStorage.getItem(REFRESH_LOCALSTORAGE_KEY);
         if (!refreshToken) {
-          // Нет refresh-токена – сбрасываем авторизацию
+          // Отсутствие refresh-токена – выходим из авторизации
           api.dispatch(authActions.logout());
           return result;
         }
-        // Выполняем GraphQL-мутацию для обновления access token
+        // Выполняем GraphQL-мутацию для обновления access-токена
         const refreshResult = await graphqlBaseQueryRaw(
           {
             url: '',
@@ -103,17 +104,17 @@ const graphqlBaseQueryWithReauth: BaseQueryFn<
           const newAccessToken = (refreshResult.data as any).data.refreshAccessToken.value;
           localStorage.setItem(ACCESS_LOCALSTORAGE_KEY, newAccessToken);
           api.dispatch(authActions.setAuth());
-          // Повторно выполняем исходный запрос, теперь с обновлённым токеном
+          // Повторно выполняем исходный запрос с новым токеном
           result = await graphqlBaseQueryRaw(prepareArgs(args), api, extraOptions);
         } else {
-          // Если обновление токена не удалось, выполняем логаут
+          // Если обновление токена не удалось – сбрасываем авторизацию
           api.dispatch(authActions.logout());
         }
       } finally {
         release();
       }
     } else {
-      // Если мьютекс заблокирован, ждем его освобождения и повторяем запрос
+      // Если мьютекс уже занят, ждём его освобождения и повторяем запрос
       await mutex.waitForUnlock();
       result = await graphqlBaseQueryRaw(prepareArgs(args), api, extraOptions);
     }
