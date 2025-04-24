@@ -7,6 +7,7 @@ import All from "@/pages/All/All";
 import Chat from "@/pages/Chat/Chat";
 import CreateChat from "@/pages/CreateChat/CreateChat";
 import Layout from "@/pages/Layout/Layout";
+import NotFound from "@/pages/NotFound/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +34,7 @@ const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/login" replace />,
+    element: <NotFound />,
   },
 ]);
 
