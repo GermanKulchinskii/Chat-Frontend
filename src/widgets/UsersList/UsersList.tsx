@@ -1,5 +1,4 @@
-// UsersList.tsx
-
+import React, { useEffect } from "react";
 import { Box, CircularProgress, List } from "@mui/material";
 import { useFindUsersQuery } from "@/services/searchUsersApi";
 import { useCurrentQuery } from "@/services/authApi";
@@ -8,7 +7,6 @@ import EmptyChats from "@/shared/EmptyChats/EmptyChats";
 import EmptyUsersList from "@/shared/EmptyUsersList/EmptyUsersList";
 import UsersListItem, { ChatOrUser } from "@/shared/UsersListItem/UsersListItem";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { useAppDispatch } from "@/store/store";
 import { authActions } from "@/store/Auth";
 import { chatActions } from "@/store/Chat";
@@ -173,4 +171,4 @@ const handleChatNavigate = (data: ChatOrUser) => {
   );
 };
 
-export default UsersList;
+export default React.memo(UsersList);

@@ -9,7 +9,7 @@
   justify-content: end;
   align-items: center;
   width: 100%;
-  gap: 1rem;
+  height: 50px;
 
   .backBtn, .createBtn, .exitBtn {
     padding: .3rem;
@@ -21,6 +21,7 @@
     height: 4vh;
     min-height: 40px;
     margin-top: 1rem;
+    gap: 1rem;
   }
 
   .link {

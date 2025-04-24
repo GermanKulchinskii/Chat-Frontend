@@ -9,13 +9,12 @@
   color: var(--white);
   justify-content: center;
   margin-top: 2rem;
+  min-height: 250px;
 
   @include breakpoints.from-tablet {
     width: 40rem;
-    min-height: 70vh;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
     border-radius: .4rem;
-    max-height: 70vh;
     overflow-y: scroll;
   }
 

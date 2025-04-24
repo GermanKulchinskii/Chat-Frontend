@@ -1,7 +1,8 @@
 .bg {
   background-color: var(--main-gray);
 
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 300px;
   width: 100vw;
   display: flex;
   justify-content: center;

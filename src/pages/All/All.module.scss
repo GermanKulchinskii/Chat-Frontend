@@ -1,0 +1,20 @@
+@use '@/styles/mixins/mixins/breakpoints.scss';
+
+.main {
+  width: 100%;
+  display: grid;  
+  grid-template-rows: 10% 10% 78%;
+  height: 100vh;
+  justify-items: center;
+  padding-bottom: 2rem;
+
+  @include breakpoints.mobile-rotate {
+    grid-template-rows: auto auto auto;
+    gap: .5rem;
+    height: auto !important;
+  }
+
+  @include breakpoints.from-tablet {
+    height: 100vh;
+  }
+}

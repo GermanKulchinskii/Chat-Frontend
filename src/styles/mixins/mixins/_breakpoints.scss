@@ -35,7 +35,7 @@
 }
 
 @mixin mobile-rotate {
-  @media (max-width: 667px) and (max-height: 400px) {
+  @media (max-height: 450px) {
     @content;
   }
 }

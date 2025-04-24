@@ -1,13 +1,22 @@
 import { TextField } from '@mui/material';
 import cl from './SearchUsers.module.scss';
+import { useEffect, useState } from 'react';
+import useDebounce from '@/hooks/useDebounce';
+import React from 'react';
 
 interface SearchUsersProps {
-  search: string;
-  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  onSearchDebounced: (search: string) => void;
 }
 
 const SearchUsers = (props: SearchUsersProps) => {
-  const { search, setSearch } = props;
+  const { onSearchDebounced } = props;
+
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
+
+  useEffect(() => {
+    onSearchDebounced(debouncedSearch);
+  }, [debouncedSearch, onSearchDebounced]);
 
   return (
     <div className={cl.searchWrapper}>
@@ -48,4 +57,4 @@ const SearchUsers = (props: SearchUsersProps) => {
   );
 };
 
-export default SearchUsers;
+export default React.memo(SearchUsers);

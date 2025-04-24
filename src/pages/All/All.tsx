@@ -1,31 +1,16 @@
-import SearchUsers from '@/widgets/SearchUsers/SearchUsers';
-import UsersList from '@/widgets/UsersList/UsersList';
-import { useEffect, useState } from 'react';
 import Header from '@/widgets/Header/Header';
-import useDebounce from '@/hooks/useDebounce';
-import { useAppDispatch } from '@/store/store';
-import { useSelector } from 'react-redux';
-import { searchQuery } from '@/store/Search/selectors';
-import { searchActions } from '@/store/Search';
+import SearchContainer from '@/widgets/SearchContainer/SearchContainer';
+import cl from './All.module.scss';
 
 const All = () => {
-  const dispatch = useAppDispatch();
-  const storedSearch = useSelector(searchQuery);
-
-  const [search, setSearch] = useState(storedSearch || "");
-  const debouncedSearch = useDebounce(search, 300);
-
-  useEffect(() => {
-    dispatch(searchActions.setSearchQuery(debouncedSearch));
-  }, [debouncedSearch, dispatch]);
+  console.log("All.tsx rendered");
 
   return (
-    <>
+    <main className={cl.main}>
       <Header />
-      <SearchUsers search={search} setSearch={setSearch} />
-      <UsersList search={debouncedSearch} />
-    </>
+      <SearchContainer />
+    </main>
   );
-}
+};
 
 export default All;
