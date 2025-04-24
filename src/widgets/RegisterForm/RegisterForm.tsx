@@ -1,24 +1,33 @@
-import React from "react";
+import React, { FormEvent, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { RegisterFormProps } from "./types";
 import cl from './RegisterForm.module.scss';
 
 const RegisterForm: React.FC<RegisterFormProps> = ({
-  registerValue,
-  setRegisterValue,
-  password,
-  setPassword,
-  passwordConfirm,
-  setPasswordConfirm,
+  setValidationError,
   validationError,
   loading,
   error,
   handleRegister,
 }) => {
+  const [registerValue, setRegisterValue] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [passwordConfirm, setPasswordConfirm] = useState<string>("");
+
+  const onSubmit = useCallback(async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      handleRegister(registerValue, password, passwordConfirm);
+    } catch (err: any) {
+      setValidationError("Ошибка регистрации: " + (err.message || "Попробуйте позже"));
+    }
+  }, [handleRegister, setValidationError, registerValue, password, passwordConfirm]);
+  
   return (
     <div className={cl.wrapper}>
       <h2 className={cl.header}>Регистрация</h2>
-      <form onSubmit={handleRegister}>
+      <form onSubmit={onSubmit}>
         <div className={cl.inputWrapper}>
           <label htmlFor="login" className={cl.label}>Логин:</label>
           <input
@@ -76,4 +85,4 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   );
 };
 
-export default RegisterForm;
+export default React.memo(RegisterForm);

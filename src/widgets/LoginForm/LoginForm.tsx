@@ -12,14 +12,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const [password, setPassword] = useState<string>("");
   const [validationError, setValidationError] = useState<string>("");
 
-  const onChangeLogin = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginValue(e.target.value);
-  }, [setLoginValue]);
-
-  const onChangePassword = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-  }, []);
-
   const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleLogin(loginValue, password, () => setValidationError(""));
@@ -35,7 +27,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             id="login"
             type="text"
             value={loginValue}
-            onChange={onChangeLogin}
+            onChange={(e) => setLoginValue(e.target.value)}
             required
             className={cl.input}
           />
@@ -46,7 +38,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             id="password"
             type="password"
             value={password}
-            onChange={onChangePassword}
+            onChange={(e) => setPassword(e.target.value)}
             required
             className={cl.input}
           />
