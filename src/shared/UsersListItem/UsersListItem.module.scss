@@ -8,12 +8,8 @@
   justify-content: space-between;
   align-items: center;
 
-  span {
-    font-size: 1.25rem;
-  }
-
   .icon {
-    height: 90%;
-    width: auto;
+    width: 2rem;
+    max-width: 24px;
   }
 }

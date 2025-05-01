@@ -10,7 +10,7 @@
   justify-content: center;
 
   @include breakpoints.from-tablet {
-    width: 40rem;
+    width: 100%;
     min-height: 400px;
     height: 100%;
     flex: 6;

@@ -3,9 +3,10 @@
 .main {
   width: 100%;
   display: grid;  
-  grid-template-rows: 10% 10% 78%;
+  grid-template-rows: minmax(auto, 40px) 1rem minmax(auto, 92px) 1fr;
   height: 100vh;
   justify-items: center;
+  padding-top: 1rem;
   padding-bottom: 2rem;
 
   @include breakpoints.mobile-rotate {
@@ -15,6 +16,9 @@
   }
 
   @include breakpoints.from-tablet {
-    height: 100vh;
+    width: 45rem;
+    padding-top: 0;
+    padding-bottom: 3rem;
+    max-width: var(--max-content-width);
   }
 }

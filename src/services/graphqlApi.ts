@@ -11,7 +11,6 @@ import {
 const SERVER_URL = 'http://localhost:8000/graphql';
 const mutex = new Mutex();
 
-// Интерфейс для GraphQL-запроса.
 interface GraphQLArgs extends Partial<Omit<FetchArgs, 'body'>> {
   body: {
     query: string;
@@ -19,7 +18,6 @@ interface GraphQLArgs extends Partial<Omit<FetchArgs, 'body'>> {
   };
 }
 
-// Функция prepareArgs позволяет задать url и method по умолчанию.
 const prepareArgs = (
   args: string | FetchArgs | GraphQLArgs
 ): string | FetchArgs => {
@@ -53,12 +51,10 @@ const graphqlBaseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  // Ждем, если идёт обновление токена
   await mutex.waitForUnlock();
 
   let result = await graphqlBaseQueryRaw(prepareArgs(args), api, extraOptions);
 
-  // Проверяем, что либо сервер вернул HTTP 401, либо в ответе есть ошибка с сообщением "401: ..."
   const isTokenInvalid =
     (result.error && result.error.status === 401) ||
     (result.data &&
@@ -71,11 +67,9 @@ const graphqlBaseQueryWithReauth: BaseQueryFn<
       try {
         const refreshToken = localStorage.getItem(REFRESH_LOCALSTORAGE_KEY);
         if (!refreshToken) {
-          // Отсутствие refresh-токена – выходим из авторизации
           api.dispatch(authActions.logout());
           return result;
         }
-        // Выполняем GraphQL-мутацию для обновления access-токена
         const refreshResult = await graphqlBaseQueryRaw(
           {
             url: '',
@@ -104,17 +98,14 @@ const graphqlBaseQueryWithReauth: BaseQueryFn<
           const newAccessToken = (refreshResult.data as any).data.refreshAccessToken.value;
           localStorage.setItem(ACCESS_LOCALSTORAGE_KEY, newAccessToken);
           api.dispatch(authActions.setAuth());
-          // Повторно выполняем исходный запрос с новым токеном
           result = await graphqlBaseQueryRaw(prepareArgs(args), api, extraOptions);
         } else {
-          // Если обновление токена не удалось – сбрасываем авторизацию
           api.dispatch(authActions.logout());
         }
       } finally {
         release();
       }
     } else {
-      // Если мьютекс уже занят, ждём его освобождения и повторяем запрос
       await mutex.waitForUnlock();
       result = await graphqlBaseQueryRaw(prepareArgs(args), api, extraOptions);
     }

@@ -2,25 +2,29 @@
 
 html {
   box-sizing: border-box;
-  font-size: 0.625vw;
+  font-size: 100%;
   line-height: 1.5;
   background-color: var(--main-gray);
 
   @include breakpoints.from-tablet {
-    font-size: 0.979vw;
+    font-size: 95%;
   }
 
   @include breakpoints.small-tablet {
-    font-size: 1.303vw;
+    font-size: 90%;
   }
 
   @include breakpoints.mobile {
-    font-size: 2.67vw;
+    font-size: 87.5%;
   }
 
   @include breakpoints.mobile-rotate {
-    font-size: 1.503vw;
+    font-size: 90%;
   }
+}
+
+body {
+  font-size: 1rem;
 }
 
 h1,

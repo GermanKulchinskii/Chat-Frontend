@@ -27,7 +27,7 @@ const CreateChat = () => {
 
   const addedUsers = useSelector(selectedUsers);
 
-  const [startGroupChat, { data, isLoading, error }] = useStartGroupChatMutation();
+  const [startGroupChat, { data, error }] = useStartGroupChatMutation();
 
   useEffect(() => {
     if (data) {
@@ -42,8 +42,8 @@ const CreateChat = () => {
   }, [error]);
 
   const createChat = () => {
-    if (addedUsers.length < 2) {
-      toast.error("Просто напиши ему?");
+    if (!addedUsers.length) {
+      toast.error("Но но но мистер фиш, ю кант толкин ту ерселф, ты же не тютю");
       return;
     }
 

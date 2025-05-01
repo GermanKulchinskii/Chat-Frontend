@@ -1,5 +1,4 @@
-import React, { useState, useCallback } from 'react';
-import { Button, TextField } from '@mui/material';
+import React, { useState, useRef, useCallback, useLayoutEffect } from 'react';
 import cl from './MessageInput.module.scss';
 import SendIcon from '@/assets/send_message.svg?react';
 
@@ -9,6 +8,14 @@ interface MessageInputProps {
 
 const MessageInput = React.memo(({ onSubmit }: MessageInputProps) => {
   const [value, setValue] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [value]);
 
   const handleSubmit = useCallback(() => {
     if (!value.trim()) return;
@@ -16,53 +23,37 @@ const MessageInput = React.memo(({ onSubmit }: MessageInputProps) => {
     setValue("");
   }, [value, onSubmit]);
 
-  const handleEnter = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (value.trim()) {
-        handleSubmit();
+  const handleEnter = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (value.trim()) {
+          handleSubmit();
+        }
       }
-    }
-  }, [value, handleSubmit]);
+    },
+    [value, handleSubmit]
+  );
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value);
   }, []);
 
   return (
     <div className={cl.wrapper}>
-      <TextField 
-        size='medium'
-        label="Сообщение"
-        variant="outlined"
+      <textarea
         id="search"
+        ref={textareaRef}
         className={cl.input}
-        minRows={1}
-        maxRows={10}
-        multiline
+        rows={1}
         value={value}
         onChange={handleChange}
         onKeyDown={handleEnter}
-        sx={{
-          textArea: { width: '87%' },
-          input: { color: 'white', fontSize: '1.25rem' },
-          '& .MuiInputBase-input': { 
-            color: 'white',
-            fontSize: '1.25rem',
-            whiteSpace: 'pre-wrap',
-          },
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': { borderColor: 'white' },
-            '&:hover fieldset': { borderColor: 'white' },
-            '&.Mui-focused fieldset': { borderColor: 'white' },
-          },
-          '& .MuiInputLabel-root': { color: 'white' },
-          '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
-        }}
+        placeholder="Сообщение..."
       />
-      <Button className={cl.btn} onClick={handleSubmit}>
+      <button type="button" className={cl.btn} onClick={handleSubmit}>
         <SendIcon className={cl.icon} />
-      </Button>
+      </button>
     </div>
   );
 });

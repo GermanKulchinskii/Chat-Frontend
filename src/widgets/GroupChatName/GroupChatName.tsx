@@ -22,7 +22,6 @@ const GroupChatName = (props: GroupChatNameProps) => {
           input: {
             color: 'white',
             width: '100%',
-            fontSize: '1.25rem',
             height: '1.25rem'
           },
           '& .MuiOutlinedInput-root': {

@@ -1,11 +1,12 @@
-import { Box, CircularProgress, List } from "@mui/material";
+import { Box, List } from "@mui/material";
 import { useFindUsersQuery } from "@/services/searchUsersApi";
-import cl from './GroupSearchUserList.module.scss';
+import cl from "./GroupSearchUserList.module.scss";
 import EmptyUsersList from "@/shared/EmptyUsersList/EmptyUsersList";
 import EmptyInput from "@/shared/EmptyInput/EmptyInput";
 import GroupSearchUsersListItem from "@/shared/GroupSearchUsersListItem/GroupSearchUsersListItem";
 import { useSelector } from "react-redux";
 import { selectedUsers } from "@/store/Search/selectors";
+import Loader from "@/shared/Loader/Loader";
 
 interface GroupSearchUserListProps {
   search: string;
@@ -14,7 +15,7 @@ interface GroupSearchUserListProps {
 const GroupSearchUserList = ({ search }: GroupSearchUserListProps) => {
   const isSearchMode = search.length >= 2;
   const addedUsers = useSelector(selectedUsers);
-  
+
   const { data, isFetching, isError } = useFindUsersQuery(
     { username: search },
     { skip: !isSearchMode }
@@ -22,40 +23,42 @@ const GroupSearchUserList = ({ search }: GroupSearchUserListProps) => {
 
   const users = data?.data?.findUsers || [];
 
-  let listContent;
-  if (isSearchMode) {
-    listContent = users.length ? (
-      users.map((user) => (
+  let content: React.ReactNode;
+
+  switch (true) {
+    case isError:
+      content = (
+        <Box color="error.main" textAlign="center">
+          Ошибка загрузки пользователей.
+        </Box>
+      );
+      break;
+    case isFetching:
+      content = <Loader />;
+      break;
+    case isSearchMode && users.length > 0:
+      content = users.map((user) => (
         <GroupSearchUsersListItem key={user.id} user={user} />
-      ))
-    ) : (
-      <EmptyUsersList />
-    );
-  } else {
-    listContent = addedUsers.length ? (
-      addedUsers.map((user: any) => (
+      ));
+      break;
+    case isSearchMode && users.length === 0:
+      content = <EmptyUsersList />;
+      break;
+    case !isSearchMode && addedUsers.length > 0:
+      content = addedUsers.map((user: any) => (
         <GroupSearchUsersListItem key={user.id} user={user} />
-      ))
-    ) : (
-      <EmptyInput />
-    );
+      ));
+      break;
+    case !isSearchMode && addedUsers.length === 0:
+      content = <EmptyInput />;
+      break;
+    default:
+      content = null;
   }
 
   return (
     <Box className={cl.usersListWrapper}>
-      {isFetching && (
-        <Box display="flex" justifyContent="center" py={2}>
-          <CircularProgress color="inherit" />
-        </Box>
-      )}
-      {isError && (
-        <Box color="error.main" textAlign="center">
-          Ошибка загрузки пользователей.
-        </Box>
-      )}
-      <List className={cl.userList}>
-        {listContent}
-      </List>
+      <List className={cl.userList}>{content}</List>
     </Box>
   );
 };

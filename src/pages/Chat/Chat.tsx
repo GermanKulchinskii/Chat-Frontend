@@ -1,85 +1,81 @@
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useCurrentQuery } from '@/services/authApi';
-import { useStartOrGetPrivateChatMutation } from '@/services/chatApi';
-import { authActions } from '@/store/Auth';
-import { userIdSelector, usernameSelector } from '@/store/Auth/selector';
+import { useGetChatQuery } from '@/services/chatApi';
 import { chatActions } from '@/store/Chat';
 import { chatIdSelector, chatNameSelector, secondUserIdSelector, secondUserNameSelector } from '@/store/Chat/selectors';
 import { useAppDispatch } from '@/store/store';
 import Header from '@/widgets/Header/Header';
 import PrivateChat from '@/widgets/PrivateChat/PrivateChat';
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import cl from './Chat.module.scss';
+import { toast } from 'react-toastify';
+
+export const CHAT_INITIAL_MESSAGES = 20;
 
 const Chats = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Инфа о чате
-  const chatId = useSelector(chatIdSelector);
-  const chatName = useSelector(chatNameSelector);
-  const secondUserName = useSelector(secondUserNameSelector) || "Чат";
+  const chatId = Number(location.pathname.split('/').at(-1));
+  const secondUserName = useSelector(secondUserNameSelector);
   const secondUserId = useSelector(secondUserIdSelector) || Number(location.pathname.split('/').at(-1));
 
-  // Получение текущего пользователя (если его ещё нет)
   const { userId, username, isFetching: isFetchingCurrent, isError: isErrorCurrent } = useCurrentUser();
 
-  const [startOrGetPrivateChat, { data, isError, isLoading }] = useStartOrGetPrivateChatMutation();
+  const { data, isError, isLoading, isFetching } = useGetChatQuery(
+    { chatId: chatId!, offset: 0, limit: CHAT_INITIAL_MESSAGES },
+    { 
+      skip: !chatId,
+      refetchOnMountOrArgChange: true,
+    }
+  );
 
   useEffect(() => {
-    if (username && userId) {
-      startOrGetPrivateChat({ secondUserId: secondUserId });
+    if (!isLoading && (isError)) {
+      toast.error('Ошибка загрузки чата.');
+      navigate('/');
     }
-  }, [username, userId, startOrGetPrivateChat, secondUserId]);
-  
-  const getChatDisplayName = (chatName: string, currentUserName: string | undefined) => {
-    const matches = chatName.match(/Чат между (\S+) и (\S+)/);
-    if (matches) {
-      const [, name1, name2] = matches;
-      return name1 === currentUserName ? name2 : name1;
-    }
-    return "чат";
-  };
+  }, [isLoading, isError, data, navigate]);
 
   useEffect(() => {
-    if (data?.data?.startOrGetPrivateChat) {
-      const chatData = data.data.startOrGetPrivateChat;
+    if (data?.data?.getChat) {
+      const chatData = data.data.getChat;
       dispatch(chatActions.setChatId({ chatId: chatData.id }));
       dispatch(chatActions.setChatName({ chatName: chatData.name }));
-
-      dispatch(chatActions.setChatInfo({ secondUserName: getChatDisplayName(chatData.name, username) }))
     }
   }, [data, dispatch]);
 
-  const loadingUser = !userId && isFetchingCurrent;
-  const errorUser = !userId && isErrorCurrent;
+  const errorUser = !userId && isErrorCurrent || isError;
+
+  let content;
+
+  if (errorUser) {
+    content = <Box color="error.main">Ошибка загрузки текущего пользователя.</Box>;
+  } else {
+    content = (
+      <PrivateChat
+        secondUserName={secondUserName}
+        secondUserId={secondUserId}
+        chatId={chatId!}
+        currentUserName={username}
+        currentUserId={userId!}
+        isError={isErrorCurrent || isError}
+        isFetching={isFetchingCurrent || isLoading || isFetching}
+        initialMessages={data?.data?.getChat?.messages || []}
+        isGroup={data?.data?.getChat?.isGroup || false}
+      />
+    );
+  }
 
   return (
-    <>
+    <main className={cl.main}>
       <Header />
-      {loadingUser ? (
-        <Box display="flex" justifyContent="center" py={2}>
-          <CircularProgress />
-        </Box>
-      ) : errorUser ? (
-        <Box color="error.main">Ошибка загрузки текущего пользователя.</Box>
-      ) : (
-        <PrivateChat
-          chatName={chatName}
-          secondUserName={secondUserName || chatName}
-          secondUserId={secondUserId}
-          chatId={chatId!}
-          currentUserName={username}
-          currentUserId={userId!}
-          isError={isErrorCurrent || isError}
-          isFetching={isFetchingCurrent || isLoading}
-          initialMessages={data?.data?.startOrGetPrivateChat?.messages || []}
-        />
-      )}
-    </>
+      {content}
+    </main>
   );
-}
+};
 
 export default Chats;

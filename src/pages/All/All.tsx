@@ -3,11 +3,10 @@ import SearchContainer from '@/widgets/SearchContainer/SearchContainer';
 import cl from './All.module.scss';
 
 const All = () => {
-  console.log("All.tsx rendered");
-
   return (
     <main className={cl.main}>
       <Header />
+      <div></div>
       <SearchContainer />
     </main>
   );

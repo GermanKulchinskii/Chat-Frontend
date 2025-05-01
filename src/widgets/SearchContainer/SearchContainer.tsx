@@ -5,8 +5,6 @@ import { useAppDispatch } from '@/store/store';
 import { searchActions } from '@/store/Search';
 
 const SearchContainer = () => {
-  console.log("SearchContainer rendered");
-
   const dispatch = useAppDispatch();
   const [debouncedSearch, setDebouncedSearch] = useState('');
 

@@ -9,14 +9,14 @@
   justify-content: end;
   align-items: center;
   width: 100%;
-  height: 50px;
+  height: 40px;
 
   .backBtn, .createBtn, .exitBtn {
     padding: .3rem;
   }
 
   @include breakpoints.from-tablet {
-    width: 40rem;
+    width: 100%;
     flex: 1;
     height: 4vh;
     min-height: 40px;
@@ -31,7 +31,8 @@
 
   .icon {
     height: auto;
-    width: 2.5rem;
+    width: 2rem;
+    max-width: 32px;
   }
 
   .createChatBtn {

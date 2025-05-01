@@ -31,7 +31,6 @@ const SearchUsers = (props: SearchUsersProps) => {
           input: {
             color: 'white',
             width: '100%',
-            fontSize: '1.35rem',
             height: '1.25rem'
           },
           '& .MuiOutlinedInput-root': {

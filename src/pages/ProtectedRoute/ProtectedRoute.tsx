@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import CircularProgress from "@mui/material/CircularProgress";
 import { useAppDispatch } from "@/store/store";
 import { authActions } from "@/store/Auth";
 import { useRefreshAccessTokenMutation } from "@/services/authApi";
 import { useSelector } from "react-redux";
 import { isAuthenticated as isAuth } from "@/store/Auth/selector";
+import Loader from "@/shared/Loader/Loader";
+import { Box } from "@mui/material";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -49,7 +50,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }, [dispatch, refreshTokenTrigger, isAuthenticated]);
 
   if (isCheckingAuth) {
-    return <CircularProgress />;
+    return ( 
+      <Box 
+        width={"100%"}
+        height={"100vh"}
+        display={"flex"}
+        justifyContent={"center"}
+        alignItems={"center"}
+        bgcolor={"#252525"}
+      >
+        <Loader />
+      </Box>
+  );
   }
 
   return isAuthenticated ? (

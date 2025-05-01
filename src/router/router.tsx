@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "@/pages/Login/Login";
 import ProtectedRoute from "@/pages/ProtectedRoute/ProtectedRoute";
 import Registration from "@/pages/Registration/Registraton";

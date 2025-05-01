@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
-import { Box, CircularProgress, List } from "@mui/material";
+import { Box, List } from "@mui/material";
 import { useFindUsersQuery } from "@/services/searchUsersApi";
 import { useCurrentQuery } from "@/services/authApi";
-import cl from './UsersList.module.scss';
+import cl from "./UsersList.module.scss";
 import EmptyChats from "@/shared/EmptyChats/EmptyChats";
 import EmptyUsersList from "@/shared/EmptyUsersList/EmptyUsersList";
 import UsersListItem, { ChatOrUser } from "@/shared/UsersListItem/UsersListItem";
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@/store/store";
 import { authActions } from "@/store/Auth";
 import { chatActions } from "@/store/Chat";
+import Loader from "@/shared/Loader/Loader";
 
 interface User {
   id: number;
@@ -33,37 +34,29 @@ interface UsersListProps {
 const UsersList = ({ search }: UsersListProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
   const isSearchMode = search.length >= 2;
-  
+
   const {
     data: findUsersData,
     isFetching: isFetchingFindUsers,
     isError: isErrorFindUsers,
   } = useFindUsersQuery(
     { username: search },
-    { 
-      skip: !isSearchMode,
-      refetchOnMountOrArgChange: true
-    }
+    { skip: !isSearchMode, refetchOnMountOrArgChange: true }
   );
 
   const {
     data: currentData,
     isFetching: isFetchingCurrent,
     isError: isErrorCurrent,
-  } = useCurrentQuery(undefined, 
-    { 
-      skip: isSearchMode,
-      refetchOnMountOrArgChange: true,
-    });
+  } = useCurrentQuery(undefined, {
+    skip: isSearchMode,
+    refetchOnMountOrArgChange: true,
+  });
 
   useEffect(() => {
-    if (
-      !isSearchMode &&
-      currentData &&
-      currentData.data &&
-      currentData.data.current
-    ) {
+    if (!isSearchMode && currentData?.data?.current) {
       const currentUser = currentData.data.current;
       dispatch(
         authActions.setUserInfo({
@@ -74,49 +67,37 @@ const UsersList = ({ search }: UsersListProps) => {
     }
   }, [currentData, isSearchMode, dispatch]);
 
-  
-const handleChatNavigate = (data: ChatOrUser) => {
-  const currentUserId = currentData?.data?.current?.id;
-  const oppositeMember =
-    "isGroup" in data && !data.isGroup && data.chatmembers
-      ? data.chatmembers.find((member) => member.id !== currentUserId)
-      : undefined;
+  const handleChatNavigate = (data: ChatOrUser) => {
+    const currentUserId = currentData?.data?.current?.id;
+    const oppositeMember =
+      "isGroup" in data && !data.isGroup && data.chatmembers
+        ? data.chatmembers.find((member) => member.id !== currentUserId)
+        : undefined;
 
-  const payload =
-    !("isGroup" in data)
+    const payload = !("isGroup" in data)
       ? {
           chatId: data.id,
           chatName: data.username,
           secondUserId: data.id,
           secondUserName: data.username,
         }
-      :
-      data.isGroup
+      : data.isGroup
       ? {
           chatId: data.id,
           chatName: data.name,
           secondUserId: undefined,
           secondUserName: undefined,
         }
-      :
-        {
+      : {
           chatId: data.id,
           chatName: oppositeMember ? oppositeMember.username : "",
           secondUserId: oppositeMember ? oppositeMember.id : undefined,
           secondUserName: oppositeMember ? oppositeMember.username : "",
         };
 
-  dispatch(chatActions.setChatInfo(payload));
-
-  if ("isGroup" in data && data.isGroup) {
-    navigate(`/chat/group/${data.id}`);
-  } else if ("isGroup" in data && !data.isGroup) {
-    navigate(`/chat/${oppositeMember ? oppositeMember.id : data.id}`);
-  } else {
+    dispatch(chatActions.setChatInfo(payload));
     navigate(`/chat/${data.id}`);
-  }
-};
-
+  };
 
   const users: User[] = isSearchMode
     ? findUsersData?.data?.findUsers || []
@@ -125,48 +106,46 @@ const handleChatNavigate = (data: ChatOrUser) => {
     ? currentData?.data?.current?.chats || []
     : [];
 
-  const isFetching = isSearchMode ? isFetchingFindUsers : isFetchingCurrent;
+
   const isError = isSearchMode ? isErrorFindUsers : isErrorCurrent;
+
+  let listContent: React.ReactNode = null;
+
+  switch (true) {
+    case isSearchMode && isFetchingFindUsers:
+      listContent = <Loader />;
+      break;
+    case isSearchMode && users.length > 0:
+      listContent = users.map((user) => (
+        <UsersListItem key={user.id} data={user} onClickFunc={handleChatNavigate} />
+      ));
+      break;
+    case isSearchMode && !isFetchingFindUsers && users.length === 0:
+      listContent = <EmptyUsersList />;
+      break;
+    case !isSearchMode && isFetchingCurrent:
+      listContent = <Loader />;
+      break;
+    case !isSearchMode && chats.length > 0:
+      listContent = chats.map((chat) => (
+        <UsersListItem key={chat.id} data={chat} onClickFunc={handleChatNavigate} />
+      ));
+      break;
+    case !isSearchMode && !isFetchingCurrent && chats.length === 0:
+      listContent = <EmptyChats />;
+      break;
+    default:
+      listContent = null;
+  }
 
   return (
     <Box className={cl.usersListWrapper}>
-      {isFetching && (
-        <Box display="flex" justifyContent="center" py={2}>
-          <CircularProgress color="inherit" />
-        </Box>
-      )}
       {isError && (
         <Box color="error.main" textAlign="center">
           Ошибка загрузки {isSearchMode ? "пользователей" : "чатов"}.
         </Box>
       )}
-      <List className={cl.userList}>
-        {isSearchMode ? (
-          users.length > 0 ? (
-            users.map((user) => (
-              <UsersListItem 
-                key={user.id} 
-                data={user} 
-                onClickFunc={handleChatNavigate} 
-              />
-            ))
-          ) : (
-            <EmptyUsersList />
-          )
-        ) : (
-          chats.length > 0 ? (
-            chats.map((chat) => (
-              <UsersListItem 
-                key={chat.id} 
-                data={chat} 
-                onClickFunc={handleChatNavigate} 
-              />
-            ))
-          ) : (
-            <EmptyChats />
-          )
-        )}
-      </List>
+      <List className={cl.userList}>{listContent}</List>
     </Box>
   );
 };

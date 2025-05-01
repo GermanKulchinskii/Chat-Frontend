@@ -10,8 +10,6 @@ import { authActions } from '@/store/Auth';
 import { searchActions } from '@/store/Search';
 
 const Header = () => {
-  console.log("Header.tsx rendered");
-
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();

@@ -7,6 +7,12 @@ export type Message = {
   status?: "pending" | "delivered",
 }
 
+export type Member = {
+  id: number,
+  username: string,
+}
+
+
 export interface ChatSchema {
   chatName?: string;
   secondUserName?: string;

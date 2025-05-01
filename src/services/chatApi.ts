@@ -1,5 +1,5 @@
 import { apiSlice } from "@/services/graphqlApi";
-import { Message } from "@/store/Chat/chatTypes";
+import { Member, Message } from "@/store/Chat/chatTypes";
 import { ChatCreationData, ChatDetails } from "./types";
 
 export const chatApi = apiSlice.injectEndpoints({
@@ -42,6 +42,8 @@ export const chatApi = apiSlice.injectEndpoints({
           getChat: { 
             id: number,
             name: string,
+            isGroup: boolean,
+            members: Member[],
             messages: Message[]
           }
         }
@@ -55,6 +57,11 @@ export const chatApi = apiSlice.injectEndpoints({
               getChat(chatId: $chatId, offset: $offset, limit: $limit) {
                 id
                 name
+                isGroup
+                members {
+                  id
+                  username
+                }
                 messages {
                   id
                   senderId
@@ -112,4 +119,5 @@ export const {
   useLazyGetChatQuery,
   useDeleteChatMutation,
   useStartGroupChatMutation,
+  useGetChatQuery,
 } = chatApi;

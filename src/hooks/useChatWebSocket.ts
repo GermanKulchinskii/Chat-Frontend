@@ -3,7 +3,7 @@ import { Message } from '@/store/Chat/chatTypes';
 
 export interface UseChatWebSocketOptions {
   chatId: number;
-  token: string;
+  token?: string;
   initialMessages?: Message[];
   wsUrl?: string;
   currentUserId: number;
@@ -11,7 +11,7 @@ export interface UseChatWebSocketOptions {
 
 const useChatWebSocket = ({
   chatId,
-  token,
+  token = localStorage.getItem('accessToken') || '',
   initialMessages = [],
   currentUserId,
   wsUrl = "ws://localhost:8000/ws",
@@ -28,12 +28,9 @@ const useChatWebSocket = ({
     ws.current.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log("WS received:", data);
 
-        // Если получено подтверждение доставки вашего отправленного сообщения:
         if (data.type === "confirmation") {
           setMessages((prev) => {
-            // Ищем сообщение с состоянием "pending", совпадающее по senderId и content.
             const index = prev.findIndex(
               (msg) =>
                 msg.status === "pending" &&
@@ -41,7 +38,6 @@ const useChatWebSocket = ({
                 msg.content === data.content
             );
             if (index !== -1) {
-              // Обновляем найденное сообщение новыми данными из сервера.
               const updatedMessage = { ...prev[index], ...data, messageType: "confirmation" };
               const updatedMessages = [...prev];
               updatedMessages[index] = updatedMessage;
@@ -50,11 +46,9 @@ const useChatWebSocket = ({
             return prev;
           });
         }
-        // Если получено новое входящее сообщение от собеседника:
         else if (data.type === "message") {
           setMessages((prev) => [...prev, { ...data, messageType: "incoming" }]);
         }
-        // Обработка fallback, если поле type отсутствует:
         else if (data.chat_id && data.content) {
           setMessages((prev) => [...prev, { ...data, messageType: "unknown" }]);
         }
@@ -63,8 +57,11 @@ const useChatWebSocket = ({
       }
     };
 
-    ws.current.onclose = () => {
-      console.log("WebSocket connection closed");
+    ws.current.onclose = (event: CloseEvent) => {
+      if (event.code !== 1000 && event.code !== 1001 && event.code !== 1005) {
+        console.log(event, event.code);
+        console.error("WebSocket connection closed unexpectedly:", event.code);
+      }
     };
 
     ws.current.onerror = (error) => {

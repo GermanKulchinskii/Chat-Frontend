@@ -1,27 +1,64 @@
+@use '@/styles/mixins/mixins/breakpoints.scss';
+
 .wrapper {
   position: relative;
-  border-top: .13rem solid var(--white);
-  padding-top: 1rem;
+  padding-top: 10px;
   height: 100%;
+  max-height: 200px;
+  display: grid;
+  grid-template-columns: 80% 20%;
+  align-items: center;
+  justify-items: center;
+  padding-bottom: 20px;
+
+  @include breakpoints.from-tablet {
+    grid-template-columns: 90% 10%;
+    padding-top: 20px;
+  }
 
   .input {
-    width: 100%;
-    max-width: 40rem;
-  }
+    width: 90%;
+    min-height: 30px;
+    border: 1px solid white;
+    border-radius: 4px;
+    background: transparent;
+    color: white;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: pre-wrap;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    resize: none;
+    overflow-y: hidden;
+    height: auto;
+    max-height: 150px;
+    padding: 5px;
 
-  .btn {
-    position: absolute;
-    min-width: 0;
-    padding: .5rem;
-    width: auto;
-    height: 100%;
-    right: 0;
-    transform: translateY(-50%);
-    top: calc(50% + .5rem);
-
-    .icon {
-      width: 100%;
-      height: 100%;
+    @include breakpoints.from-tablet {
+      font-size: 15px;
+      padding: 10px;
     }
   }
+}
+
+.btn {
+  padding: 0;
+  justify-self: center;
+  align-self: flex-end;
+  min-width: 0;
+  height: 30px;
+  width: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  @include breakpoints.from-tablet {
+    height: 37px;
+    width: 37px;
+  }
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
 }

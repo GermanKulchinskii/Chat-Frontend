@@ -33,7 +33,6 @@ const SelectTemplate: React.FC<SelectTemplateProps> = ({
     }
   };
 
-  // Определяем, является ли label строкой
   const isLabelString = typeof label === 'string';
 
   return (
