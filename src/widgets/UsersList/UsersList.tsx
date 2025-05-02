@@ -109,35 +109,34 @@ const UsersList = ({ search }: UsersListProps) => {
 
   const isError = isSearchMode ? isErrorFindUsers : isErrorCurrent;
 
-let listContent: React.ReactNode = null;
+  let listContent: React.ReactNode = null;
 
-switch (true) {
-  case isSearchMode && isFetchingFindUsers:
-    listContent = <Loader />;
-    break;
-  case isSearchMode && users.length > 0:
-    listContent = users.map((user) => (
-      <UsersListItem key={user.id} data={user} onClickFunc={handleChatNavigate} />
-    ));
-    break;
-  case isSearchMode && !isFetchingFindUsers && users.length === 0:
-    listContent = <EmptyUsersList />;
-    break;
-  case !isSearchMode && isFetchingCurrent:
-    listContent = <Loader />;
-    break;
-  case !isSearchMode && chats.length > 0:
-    listContent = chats.map((chat) => (
-      <UsersListItem key={chat.id} data={chat} onClickFunc={handleChatNavigate} />
-    ));
-    break;
-  case !isSearchMode && !isFetchingCurrent && chats.length === 0:
-    listContent = <EmptyChats />;
-    break;
-  default:
-    listContent = null;
-}
-
+  switch (true) {
+    case isSearchMode && isFetchingFindUsers:
+      listContent = <Loader />;
+      break;
+    case isSearchMode && users.length > 0:
+      listContent = users.map((user) => (
+        <UsersListItem key={user.id} data={user} onClickFunc={handleChatNavigate} />
+      ));
+      break;
+    case isSearchMode && !isFetchingFindUsers && users.length === 0:
+      listContent = <EmptyUsersList />;
+      break;
+    case !isSearchMode && isFetchingCurrent:
+      listContent = <Loader />;
+      break;
+    case !isSearchMode && chats.length > 0:
+      listContent = chats.map((chat) => (
+        <UsersListItem key={chat.id} data={chat} onClickFunc={handleChatNavigate} />
+      ));
+      break;
+    case !isSearchMode && !isFetchingCurrent && chats.length === 0:
+      listContent = <EmptyChats />;
+      break;
+    default:
+      listContent = null;
+  }
 
   return (
     <Box className={cl.usersListWrapper}>

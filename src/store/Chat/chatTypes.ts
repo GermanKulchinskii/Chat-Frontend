@@ -18,6 +18,6 @@ export interface ChatSchema {
   secondUserName?: string;
   secondUserId?: number;
   chatId?: number;
-
+  members?: Member[];
   messages?: Message[];
 }

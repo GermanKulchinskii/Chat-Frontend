@@ -8,6 +8,13 @@
   justify-content: space-between;
   align-items: center;
 
+  .groupWrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
   .icon {
     width: 2rem;
     max-width: 24px;

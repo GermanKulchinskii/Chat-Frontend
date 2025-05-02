@@ -44,6 +44,7 @@ const Chats = () => {
       const chatData = data.data.getChat;
       dispatch(chatActions.setChatId({ chatId: chatData.id }));
       dispatch(chatActions.setChatName({ chatName: chatData.name }));
+      dispatch(chatActions.setChatInfo({ members: chatData.members }));
     }
   }, [data, dispatch]);
 
@@ -108,7 +109,7 @@ const Chats = () => {
       isFetching={loading}
       initialMessages={initialMessages}
       noChat={noChat}
-      chatName={data?.data?.getChat?.name || "Чат"}
+      chatName={data?.data?.getChat?.name || userData?.data.findUserById.username || "Чат"}
     />
   );
 

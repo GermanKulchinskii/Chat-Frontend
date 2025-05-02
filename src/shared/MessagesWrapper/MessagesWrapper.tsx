@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useMemo, useLayoutEffect } from 'react';
 import { Message as MessageType } from '@/store/Chat/chatTypes';
 import cl from './MessagesWrapper.module.scss';
 import Message from '@/shared/Message/Message';
+import { membersSelector } from '@/store/Chat/selectors';
+import { useSelector } from 'react-redux';
 
 interface ChatMessagesProps {
   messages: MessageType[];
@@ -14,8 +16,12 @@ interface ChatMessagesProps {
 
 const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
   const { isError, isFetching, messages, sendingMessages, requestMessages, currentUserId } = props;
+
+  const idFromUrl = location.pathname.split('/').at(-1) || "";
+  const isChatId = idFromUrl.startsWith("200");
+
+  const members = useSelector(membersSelector);
   
-  // Собираем все сообщения и сортируем по времени отправки по возрастанию.
   const combinedMessages = useMemo(() => {
     const allMessages = [...messages, ...sendingMessages];
     return allMessages.sort((a, b) => {
@@ -28,12 +34,9 @@ const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<HTMLDivElement | null>(null);
   
-  // Флаг для первичной прокрутки вниз при монтировании
   const initialScrollDone = useRef(false);
-  // Реф для запоминания последнего количества сообщений (combinedMessages)
   const lastCombinedMessagesCountRef = useRef<number>(combinedMessages.length);
 
-  // Первоначальная прокрутка вниз после первого рендера
   useEffect(() => {
     if (wrapperRef.current && combinedMessages.length && !initialScrollDone.current) {
       wrapperRef.current.scrollTop = wrapperRef.current.scrollHeight;
@@ -42,7 +45,6 @@ const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
     }
   }, [combinedMessages]);
 
-  // IntersectionObserver для подгрузки старых сообщений, когда sentinel появляется в зоне видимости
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -66,14 +68,11 @@ const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
     };
   }, [requestMessages, isError, isFetching]);
 
-  // Используем useLayoutEffect для корректировки скролла при подгрузке старых сообщений (при их вставке сверху)
   const prevMessagesLengthRef = useRef<number>(messages.length);
   const prevScrollHeightRef = useRef<number>(wrapperRef.current?.scrollHeight || 0);
 
   useLayoutEffect(() => {
     if (wrapperRef.current) {
-      // Если количество сообщений увеличилось (подгрузились старые сообщения)
-      // и контейнер прокручен почти до верха, корректируем scrollTop так, чтобы видимая область осталась на месте.
       if (messages.length > prevMessagesLengthRef.current && wrapperRef.current.scrollTop < 50) {
         const newScrollHeight = wrapperRef.current.scrollHeight;
         const scrollDiff = newScrollHeight - prevScrollHeightRef.current;
@@ -84,16 +83,13 @@ const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
     }
   }, [messages]);
 
-  // Если пользователь находится близко к концу чата и появляется новое сообщение
-  // (в том числе чужое или отправленное пользователем), то прокручиваем чат вниз.
   useEffect(() => {
     if (!wrapperRef.current || !initialScrollDone.current) return;
 
-    // Определяем, добавились ли новые сообщения
     if (combinedMessages.length > lastCombinedMessagesCountRef.current) {
       const { scrollTop, clientHeight, scrollHeight } = wrapperRef.current;
       const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-      const threshold = 100; // пороговое значение, в пикселях
+      const threshold = 100;
       if (distanceFromBottom < threshold) {
         wrapperRef.current.scrollTop = scrollHeight;
       }
@@ -110,6 +106,11 @@ const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
             key={message.id ? `${message.id}-${index}` : `msg-${index}`}
             {...message}
             isOwn={message.senderId === currentUserId}
+            senderName={
+              isChatId && message.senderId !== currentUserId
+                ? members?.find((member) => member.id === message.senderId)?.username
+                : undefined
+            }
           />
         ))}
       </div>
