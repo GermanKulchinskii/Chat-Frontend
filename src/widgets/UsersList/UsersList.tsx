@@ -5,26 +5,17 @@ import { useCurrentQuery } from "@/services/authApi";
 import cl from "./UsersList.module.scss";
 import EmptyChats from "@/shared/EmptyChats/EmptyChats";
 import EmptyUsersList from "@/shared/EmptyUsersList/EmptyUsersList";
-import UsersListItem, { ChatOrUser } from "@/shared/UsersListItem/UsersListItem";
+import UsersListItem from "@/shared/UsersListItem/UsersListItem";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "@/store/store";
 import { authActions } from "@/store/Auth";
 import { chatActions } from "@/store/Chat";
 import Loader from "@/shared/Loader/Loader";
+import { Chat, PrivateChat } from "@/services/types";
 
 interface User {
   id: number;
   username: string;
-}
-
-export interface Chat {
-  id: number;
-  name: string;
-  isGroup: boolean;
-  chatmembers: {
-    id: number;
-    username: string;
-  }[];
 }
 
 interface UsersListProps {
@@ -67,76 +58,86 @@ const UsersList = ({ search }: UsersListProps) => {
     }
   }, [currentData, isSearchMode, dispatch]);
 
-  const handleChatNavigate = (data: ChatOrUser) => {
-    const currentUserId = currentData?.data?.current?.id;
-    const oppositeMember =
-      "isGroup" in data && !data.isGroup && data.chatmembers
-        ? data.chatmembers.find((member) => member.id !== currentUserId)
-        : undefined;
 
-    const payload = !("isGroup" in data)
-      ? {
+  const handleChatNavigate = (data: Chat | PrivateChat | User) => {
+    if ("username" in data) {
+      dispatch(
+        chatActions.setChatInfo({
           chatId: data.id,
           chatName: data.username,
           secondUserId: data.id,
           secondUserName: data.username,
-        }
-      : data.isGroup
-      ? {
-          chatId: data.id,
-          chatName: data.name,
-          secondUserId: undefined,
-          secondUserName: undefined,
-        }
-      : {
-          chatId: data.id,
-          chatName: oppositeMember ? oppositeMember.username : "",
-          secondUserId: oppositeMember ? oppositeMember.id : undefined,
-          secondUserName: oppositeMember ? oppositeMember.username : "",
-        };
-
-    dispatch(chatActions.setChatInfo(payload));
-    navigate(`/chat/${data.id}`);
+        })
+      );
+      navigate(`/chat/100${data.id}`);
+    }
+    else if ("chatmembers" in data && "sequentialNumber" in data) {
+        dispatch(
+          chatActions.setChatInfo({
+            chatId: data.id,
+            chatName: data.name,
+            secondUserId: undefined,
+            secondUserName: undefined,
+          })
+        );
+        navigate(`/chat/200${data.sequentialNumber}`);
+    } else {
+      const interlocutor = data.chatmembers.find(member => member.id !== currentData?.data.current.id);
+      if (interlocutor) {
+        dispatch(
+          chatActions.setChatInfo({
+            chatId: data.id,
+            chatName: interlocutor.username,
+            secondUserId: interlocutor.id,
+            secondUserName: interlocutor.username,
+          })
+        );
+        navigate(`/chat/100${interlocutor.id}`);
+      }
+    }
   };
 
   const users: User[] = isSearchMode
     ? findUsersData?.data?.findUsers || []
     : [];
-  const chats: Chat[] = !isSearchMode
-    ? currentData?.data?.current?.chats || []
-    : [];
 
+  let chats: Chat[] | PrivateChat[] = [];
+  if (!isSearchMode && currentData?.data?.current) {
+    const { privateChats, chats: groupChats } = currentData.data.current;
+    chats = [...(privateChats || []), ...(groupChats || [])];
+  }
 
   const isError = isSearchMode ? isErrorFindUsers : isErrorCurrent;
 
-  let listContent: React.ReactNode = null;
+let listContent: React.ReactNode = null;
 
-  switch (true) {
-    case isSearchMode && isFetchingFindUsers:
-      listContent = <Loader />;
-      break;
-    case isSearchMode && users.length > 0:
-      listContent = users.map((user) => (
-        <UsersListItem key={user.id} data={user} onClickFunc={handleChatNavigate} />
-      ));
-      break;
-    case isSearchMode && !isFetchingFindUsers && users.length === 0:
-      listContent = <EmptyUsersList />;
-      break;
-    case !isSearchMode && isFetchingCurrent:
-      listContent = <Loader />;
-      break;
-    case !isSearchMode && chats.length > 0:
-      listContent = chats.map((chat) => (
-        <UsersListItem key={chat.id} data={chat} onClickFunc={handleChatNavigate} />
-      ));
-      break;
-    case !isSearchMode && !isFetchingCurrent && chats.length === 0:
-      listContent = <EmptyChats />;
-      break;
-    default:
-      listContent = null;
-  }
+switch (true) {
+  case isSearchMode && isFetchingFindUsers:
+    listContent = <Loader />;
+    break;
+  case isSearchMode && users.length > 0:
+    listContent = users.map((user) => (
+      <UsersListItem key={user.id} data={user} onClickFunc={handleChatNavigate} />
+    ));
+    break;
+  case isSearchMode && !isFetchingFindUsers && users.length === 0:
+    listContent = <EmptyUsersList />;
+    break;
+  case !isSearchMode && isFetchingCurrent:
+    listContent = <Loader />;
+    break;
+  case !isSearchMode && chats.length > 0:
+    listContent = chats.map((chat) => (
+      <UsersListItem key={chat.id} data={chat} onClickFunc={handleChatNavigate} />
+    ));
+    break;
+  case !isSearchMode && !isFetchingCurrent && chats.length === 0:
+    listContent = <EmptyChats />;
+    break;
+  default:
+    listContent = null;
+}
+
 
   return (
     <Box className={cl.usersListWrapper}>

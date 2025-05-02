@@ -1,0 +1,24 @@
+@use '@/styles/mixins/mixins/breakpoints.scss';
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  min-height: 200px;
+  min-width: 280px;
+  padding-top: 15px;
+  
+  @include breakpoints.from-tablet {
+    height: 100%;
+    width: 100%;
+    min-height: 400px;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+    border-radius: 0.4rem;
+    position: relative;
+    padding: 0;
+  }
+
+  
+}

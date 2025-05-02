@@ -1,40 +1,40 @@
 import cl from './PrivateChat.module.scss';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Message } from '@/store/Chat/chatTypes';
-import { useLazyGetChatQuery } from '@/services/chatApi';
+import { useLazyGetChatQuery, useStartPrivateChatMutation } from '@/services/chatApi';
 import useChatWebSocket from '@/hooks/useChatWebSocket';
 import MessageInput from '@/shared/MessageInput/Message.Input';
 import MessagesWrapper from '@/shared/MessagesWrapper/MessagesWrapper';
 import MoreIcon from '@/assets/more_icon.svg?react';
 import { Button } from '@mui/material';
-import { useChatDisplayName } from '@/hooks/useChatInitInfo';
 import { CHAT_INITIAL_MESSAGES } from '@/pages/Chat/Chat';
 import Loader from '@/shared/Loader/Loader';
+import { toast } from 'react-toastify';
 
 interface PrivateChatProps {
   chatName?: string;
   secondUserName?: string;
   secondUserId?: number;
-  chatId: number;
+  chatId: string;
   currentUserId: number;
   currentUserName?: string;
   isError: any;
   isFetching: any;
   initialMessages: Message[];
-  isGroup: boolean;
+  isGroup?: boolean;
+  noChat?: boolean;
 }
 
 const PrivateChat = ({
   chatName,
   currentUserId,
-  secondUserName,
   chatId,
   initialMessages,
   isError,
   isFetching,
-  isGroup,
+  noChat = false,
+  secondUserId,
 }: PrivateChatProps) => {
-  const displayName = useChatDisplayName({ name: chatName, username: secondUserName, isGroup });
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const offset = useRef<number>(initialMessages.length);
   const [noMoreMessages, setNoMoreMessages] = useState(false);
@@ -47,10 +47,22 @@ const PrivateChat = ({
     offset.current = initialMessages.length;
   }, [initialMessages]);
 
+  const [activeChatId, setActiveChatId] = useState<string>("");
+  useEffect(() => {
+    if (noChat) {
+      setActiveChatId("");
+    } else {
+      setActiveChatId(String(chatId));
+    }
+  }, [noChat, chatId]);
+
   const isFetchingRef = useRef(false);
   const [fetchChat] = useLazyGetChatQuery();
 
-  const { messages: wsMessages, sendMessage } = useChatWebSocket({ chatId, currentUserId });
+  const { messages: wsMessages, sendMessage: wsSendMessage } = useChatWebSocket({
+    chatId: activeChatId,
+    currentUserId:`100${currentUserId}`,
+  });
 
   const combinedMessages = useMemo(() => [...messages, ...wsMessages], [messages, wsMessages]);
   const deliveredMessages = useMemo(
@@ -63,11 +75,11 @@ const PrivateChat = ({
   );
 
   const requestMessages = useCallback(() => {
-    if (!chatId || noMoreMessages || isFetchingRef.current || initialMessages.length === 0) return;
+    if (!activeChatId || noMoreMessages || isFetchingRef.current || initialMessages.length === 0) return;
     isFetchingRef.current = true;
     setLoadingOlder(true);
 
-    fetchChat({ chatId, offset: offset.current, limit: CHAT_INITIAL_MESSAGES })
+    fetchChat({ chatId: activeChatId, offset: offset.current, limit: CHAT_INITIAL_MESSAGES })
       .unwrap()
       .then((result) => {
         const fetched: Message[] = result.data?.getChat?.messages ?? [];
@@ -83,15 +95,36 @@ const PrivateChat = ({
         setLoadingOlder(false);
         isFetchingRef.current = false;
       });
-  }, [chatId, noMoreMessages, fetchChat, initialMessages]);
+  }, [activeChatId, noMoreMessages, fetchChat, initialMessages]);
+
+  const [startPrivateChat] = useStartPrivateChatMutation();
 
   const handleSendMessage = useCallback(
-    (msg: string) => {
-      if (msg.trim()) {
-        sendMessage(msg, currentUserId);
+    async (msg: string) => {
+      if (!msg.trim()) return;
+
+      console.log("handleSendMessage called", { noChat, activeChatId, secondUserId, message: msg });
+      
+      if (noChat && activeChatId === "" && secondUserId) {
+        try {
+          const result = await startPrivateChat({ secondUserId: Number(chatId.slice(3)) }).unwrap();
+          const newChat = result.data.startPrivateChat;
+          console.log("startPrivateChat response", newChat);
+          setActiveChatId(String(newChat.id));
+          if (newChat.messages && newChat.messages.length > 0) {
+            setMessages(newChat.messages);
+            offset.current = newChat.messages.length;
+          }
+          wsSendMessage(msg, currentUserId);
+        } catch (error) {
+          console.error("Error starting private chat", error);
+          toast.error("Ошибка создания чата.");
+        }
+      } else {
+        wsSendMessage(msg, currentUserId);
       }
     },
-    [sendMessage, currentUserId]
+    [noChat, activeChatId, secondUserId, startPrivateChat, wsSendMessage, currentUserId]
   );
 
   const toggleDeleteBtn = useCallback(() => {
@@ -116,7 +149,7 @@ const PrivateChat = ({
       ) : (
         <>
           <div className={cl.header}>
-            <p className={cl.username}>{displayName}</p>
+            <p className={cl.username}>{chatName}</p>
             <Button
               className={cl.iconBtn}
               onClick={toggleDeleteBtn}

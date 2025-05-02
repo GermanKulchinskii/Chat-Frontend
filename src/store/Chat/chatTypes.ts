@@ -3,7 +3,7 @@ export type Message = {
   content: string,
   sentAt: string,
   senderId: number,
-  chat_id?: number,      
+  chat_id?: number | string,      
   status?: "pending" | "delivered",
 }
 

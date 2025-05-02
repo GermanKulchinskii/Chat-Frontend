@@ -86,10 +86,18 @@ export const authApi = apiSlice.injectEndpoints({
           current: {
             id: number;
             username: string;
+            privateChats: {
+              id: number; 
+              name: string, 
+              chatmembers: {
+                id: number,
+                username: string,
+              }[]
+            }[];
             chats: { 
               id: number; 
               name: string, 
-              isGroup: boolean,
+              sequentialNumber: number,
               chatmembers: {
                 id: number,
                 username: string,
@@ -107,10 +115,18 @@ export const authApi = apiSlice.injectEndpoints({
               current {
                 id
                 username
+                privateChats {
+                  id
+                  name
+                  chatmembers {
+                    id
+                    username
+                  }
+                }
                 chats {
                   id
                   name
-                  isGroup
+                  sequentialNumber
                   chatmembers {
                     id
                     username
@@ -126,4 +142,10 @@ export const authApi = apiSlice.injectEndpoints({
   overrideExisting: false,
 });
 
-export const { useRegisterMutation, useLoginMutation, useRefreshAccessTokenMutation, useCurrentQuery } = authApi;
+export const { 
+  useRegisterMutation, 
+  useLoginMutation, 
+  useRefreshAccessTokenMutation, 
+  useCurrentQuery,
+  useLazyCurrentQuery
+} = authApi;

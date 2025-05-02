@@ -2,15 +2,13 @@ import React from 'react';
 import cl from './UsersListItem.module.scss';
 import { ListItemButton, ListItemText } from '@mui/material';
 import ChatIcon from '@/assets/chat.svg?react';
-import { User } from '@/store/Search/searchTypes';
-import { Chat } from '@/widgets/UsersList/UsersList';
 import { useChatDisplayName } from '@/hooks/useChatInitInfo';
-
-export type ChatOrUser = User | Chat;
+import { Chat, PrivateChat } from '@/services/types';
+import { User } from '@/store/Search/searchTypes';
 
 export interface UsersListItemProps {
-  data: ChatOrUser;
-  onClickFunc?: (data: ChatOrUser) => void;
+  data: Chat | PrivateChat | User;
+  onClickFunc?: (data: Chat | PrivateChat | User) => void;
 }
 
 const UsersListItem: React.FC<UsersListItemProps> = ({ data, onClickFunc }) => {
@@ -24,7 +22,7 @@ const UsersListItem: React.FC<UsersListItemProps> = ({ data, onClickFunc }) => {
 
   return (
     <ListItemButton className={cl.listItem} onClick={handleClick}>
-      <ListItemText primary={displayName} />
+      <ListItemText primary={"name" in data ? data?.name : data?.username} />
       <ChatIcon className={cl.icon} />
     </ListItemButton>
   );

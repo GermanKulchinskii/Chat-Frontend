@@ -2,11 +2,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Message } from '@/store/Chat/chatTypes';
 
 export interface UseChatWebSocketOptions {
-  chatId: number;
+  chatId: string;
   token?: string;
   initialMessages?: Message[];
   wsUrl?: string;
-  currentUserId: number;
+  currentUserId: string;
 }
 
 const useChatWebSocket = ({
@@ -28,13 +28,12 @@ const useChatWebSocket = ({
     ws.current.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-
         if (data.type === "confirmation") {
           setMessages((prev) => {
             const index = prev.findIndex(
               (msg) =>
                 msg.status === "pending" &&
-                msg.senderId === currentUserId &&
+                `100${msg.senderId}` === currentUserId &&
                 msg.content === data.content
             );
             if (index !== -1) {
@@ -45,11 +44,9 @@ const useChatWebSocket = ({
             }
             return prev;
           });
-        }
-        else if (data.type === "message") {
+        } else if (data.type === "message") {
           setMessages((prev) => [...prev, { ...data, messageType: "incoming" }]);
-        }
-        else if (data.chat_id && data.content) {
+        } else if (data.chat_id && data.content) {
           setMessages((prev) => [...prev, { ...data, messageType: "unknown" }]);
         }
       } catch (error) {
@@ -59,13 +56,12 @@ const useChatWebSocket = ({
 
     ws.current.onclose = (event: CloseEvent) => {
       if (event.code !== 1000 && event.code !== 1001 && event.code !== 1005) {
-        console.log(event, event.code);
         console.error("WebSocket connection closed unexpectedly:", event.code);
       }
     };
 
     ws.current.onerror = (error) => {
-      console.error("WebSocket error:", error);
+      console.error("WebSocket error", error);
     };
 
     return () => {
@@ -73,8 +69,9 @@ const useChatWebSocket = ({
     };
   }, [token, chatId, wsUrl, currentUserId]);
 
-  const sendMessage = useCallback((content: string, senderId: number) => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+  const sendMessage = useCallback(
+    (content: string, senderId: number) => {
+      const payload = { content, chat_id: chatId };
       const pendingMessage: Message = {
         id: Date.now(),
         senderId,
@@ -85,11 +82,20 @@ const useChatWebSocket = ({
       };
       setMessages((prev) => [...prev, pendingMessage]);
 
-      const payload = { content, chat_id: chatId };
-      console.log("WS: Отправка сообщения", payload);
-      ws.current.send(JSON.stringify(payload));
-    }
-  }, [chatId]);
+      if (ws.current) {
+        if (ws.current.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify(payload));
+        } else {
+          const onOpenHandler = () => {
+            ws.current?.send(JSON.stringify(payload));
+            ws.current?.removeEventListener('open', onOpenHandler);
+          };
+          ws.current.addEventListener('open', onOpenHandler);
+        }
+      }
+    },
+    [chatId]
+  );
 
   return { messages, sendMessage };
 };

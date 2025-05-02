@@ -1,16 +1,20 @@
 import { apiSlice } from "@/services/graphqlApi";
 import { Member, Message } from "@/store/Chat/chatTypes";
-import { ChatCreationData, ChatDetails } from "./types";
+import { ChatCreationData, ChatDetails, ErrorType } from "./types";
 
 export const chatApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    startOrGetPrivateChat: builder.mutation<
+    startPrivateChat: builder.mutation<
       {
         data: {
-          startOrGetPrivateChat: { 
+          startPrivateChat: { 
             id: number, 
             name: string,
-            messages: Message[]
+            messages: Message[],
+            members: {
+              id: number,
+              username: string,
+            }
           }
         }
       },
@@ -19,15 +23,13 @@ export const chatApi = apiSlice.injectEndpoints({
       query: ({ secondUserId }) => ({
         body: {
           query: `
-            mutation startOrGetPrivateChat($secondUserId: Int!) {
-              startOrGetPrivateChat(secondUserId: $secondUserId) {
+            mutation startPrivateChat($secondUserId: Int!) {
+              startPrivateChat(secondUserId: $secondUserId) {
                 id
                 name
-                messages {
+                members {
                   id
-                  senderId
-                  content
-                  sentAt
+                  username
                 }
               }
             }
@@ -39,25 +41,24 @@ export const chatApi = apiSlice.injectEndpoints({
     getChat: builder.query<
       {
         data: {
-          getChat: { 
+          getChat?: { 
             id: number,
             name: string,
-            isGroup: boolean,
             members: Member[],
             messages: Message[]
-          }
+          },
         }
+        errors?: ErrorType[]
       },
-      { chatId: number; offset?: number; limit?: number }
+      { chatId: string; offset?: number; limit?: number }
     >({
       query: ({ chatId, offset = 0, limit = 10 }) => ({
         body: {
           query: `
-            query getChat($chatId: Int!, $offset: Int!, $limit: Int!) {
+            query getChat($chatId: String!, $offset: Int!, $limit: Int!) {
               getChat(chatId: $chatId, offset: $offset, limit: $limit) {
                 id
                 name
-                isGroup
                 members {
                   id
                   username
@@ -115,7 +116,7 @@ export const chatApi = apiSlice.injectEndpoints({
 });
 
 export const { 
-  useStartOrGetPrivateChatMutation, 
+  useStartPrivateChatMutation, 
   useLazyGetChatQuery,
   useDeleteChatMutation,
   useStartGroupChatMutation,
