@@ -83,9 +83,8 @@ export const chatApi = apiSlice.injectEndpoints({
       query: ({ chatId }) => ({
         body: {
           query: `
-            mutation deleteChat($chatId: int!) {
-              deleteChat(chatId: $chatId) {
-              }
+            mutation deleteChat($chatId: Int!) {
+              deleteChat(chatId: $chatId)
             }
           `,
           variables: { chatId },

@@ -10,6 +10,9 @@ import { Button } from '@mui/material';
 import { CHAT_INITIAL_MESSAGES } from '@/pages/Chat/Chat';
 import Loader from '@/shared/Loader/Loader';
 import { toast } from 'react-toastify';
+import DeleteChatModal from '../DeleteChatModal/DeleteChatModal';
+import { useSelector } from 'react-redux';
+import { chatIdSelector } from '@/store/Chat/selectors';
 
 interface PrivateChatProps {
   chatName?: string;
@@ -42,6 +45,12 @@ const PrivateChat = ({
   const [isDeleteBtn, setIsDeleteBtn] = useState(false);
   const deleteBtnRef = useRef<HTMLDivElement>(null);
 
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const globalChatId = useSelector(chatIdSelector);
+
+  const isGroupChat = chatId.startsWith("200");
+
   useEffect(() => {
     setMessages(initialMessages);
     offset.current = initialMessages.length;
@@ -61,7 +70,7 @@ const PrivateChat = ({
 
   const { messages: wsMessages, sendMessage: wsSendMessage } = useChatWebSocket({
     chatId: activeChatId,
-    currentUserId:`100${currentUserId}`,
+    currentUserId: `100${currentUserId}`,
   });
 
   const combinedMessages = useMemo(() => [...messages, ...wsMessages], [messages, wsMessages]);
@@ -124,7 +133,7 @@ const PrivateChat = ({
         wsSendMessage(msg, currentUserId);
       }
     },
-    [noChat, activeChatId, secondUserId, startPrivateChat, wsSendMessage, currentUserId]
+    [noChat, activeChatId, secondUserId, startPrivateChat, wsSendMessage, currentUserId, chatId]
   );
 
   const toggleDeleteBtn = useCallback(() => {
@@ -150,16 +159,20 @@ const PrivateChat = ({
         <>
           <div className={cl.header}>
             <p className={cl.username}>{chatName}</p>
-            <Button
-              className={cl.iconBtn}
-              onClick={toggleDeleteBtn}
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              <MoreIcon className={cl.icon} />
-            </Button>
-            {isDeleteBtn && (
+            {isGroupChat && (
+              <Button
+                className={cl.iconBtn}
+                onClick={toggleDeleteBtn}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <MoreIcon className={cl.icon} />
+              </Button>
+            )}
+            {isGroupChat && isDeleteBtn && (
               <div className={cl.deleteOption} ref={deleteBtnRef}>
-                <Button className={cl.btn}>Удалить чат?</Button>
+                <Button className={cl.btn} onClick={() => setIsDeleteModalOpen(true)}>
+                  Удалить чат?
+                </Button>
               </div>
             )}
           </div>
@@ -176,6 +189,12 @@ const PrivateChat = ({
           <div className={cl.inputWrapper}>
             <MessageInput onSubmit={handleSendMessage} />
           </div>
+          {isGroupChat && isDeleteModalOpen && <div className={cl.overlay} />}
+          {isGroupChat && isDeleteModalOpen && (
+            <div className={cl.modalWrapper}>
+              <DeleteChatModal isOpen={isDeleteModalOpen} setIsOpen={setIsDeleteModalOpen} chatId={globalChatId} />
+            </div>
+          )}
         </>
       )}
     </div>

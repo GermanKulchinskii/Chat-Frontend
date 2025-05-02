@@ -5,13 +5,13 @@ import useDeleteChat from '@/hooks/useDeleteChat';
 type DeleteChatModalProps = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  chatId?: number;
 }
 
 const DeleteChatModal = (props: DeleteChatModalProps) => {
-  const { isOpen, setIsOpen } = props;
-  const chatId = Number(window.location.pathname.split('/').at(-1)?.slice(3) || 0);
+  const { chatId, isOpen, setIsOpen } = props;
 
-  const { deleteChatHandler, isLoading } = useDeleteChat(chatId);
+  const { deleteChatHandler, isLoading } = useDeleteChat(chatId!);
 
   const closeModal = () => {
     setIsOpen(false);
