@@ -23,7 +23,7 @@ This app uses WebSocket to enable realtime message exchange, allows for private 
 ## Dev
 ### Requirements
 To deploy you'll need:
-- [yarn]([https://python-poetry.org/docs/](https://yarnpkg.com/getting-started))
+- [Yarn](https://yarnpkg.com/getting-started)
 
 ### Steps
 1. Pick a directory and do a ```git clone``` of this project
