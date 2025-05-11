@@ -1,54 +1,37 @@
-# React + TypeScript + Vite
+## Fastapi GraphQL React chat web app
+This app uses WebSocket to enable realtime message exchange, allows for private and group chats and offers basic chat admin functions
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Package requirements
+```
+"@apollo/client": "^3.13.3",
+"@emotion/react": "^11.14.0",
+"@emotion/styled": "^11.14.0",
+"@mui/icons-material": "^6.4.7",
+"@mui/material": "^6.4.7",
+"@reduxjs/toolkit": "^2.6.1",
+"async-mutex": "^0.5.0",
+"graphql": "^16.10.0",
+"graphql-request": "^7.1.2",
+"react": "^19.0.0",
+"react-dom": "^19.0.0",
+"react-redux": "^9.2.0",
+"react-router-dom": "^7.3.0",
+"react-toastify": "^11.0.5",
+"sass": "^1.85.1"
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Dev
+### Requirements
+To deploy you'll need:
+- [Yarn](https://yarnpkg.com/getting-started)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+### Steps
+1. Pick a directory and do a ```git clone``` of this project
+2. Run 
+```shell
+yarn install
+```
+3. Start the dev server
+```shell
+yarn dev
 ```
