@@ -57,6 +57,7 @@ const PrivateChat = ({
   }, [initialMessages]);
 
   const [activeChatId, setActiveChatId] = useState<string>("");
+  
   useEffect(() => {
     if (noChat) {
       setActiveChatId("");
@@ -124,6 +125,7 @@ const PrivateChat = ({
             setMessages(newChat.messages);
             offset.current = newChat.messages.length;
           }
+          console.log("Вызов wsSendMessage", msg, currentUserId);
           wsSendMessage(msg, currentUserId);
         } catch (error) {
           console.error("Error starting private chat", error);

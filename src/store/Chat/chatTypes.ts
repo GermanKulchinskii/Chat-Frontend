@@ -5,6 +5,7 @@ export type Message = {
   senderId: number,
   chat_id?: number | string,      
   status?: "pending" | "delivered",
+  sender_id?: number,
 }
 
 export type Member = {

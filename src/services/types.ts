@@ -3,6 +3,7 @@ export type Message = {
   senderId: number,
   content: string,
   sentAt: string,
+  sender_id?: number,
 }
 
 export type ChatDetails = {

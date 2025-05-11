@@ -20,7 +20,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <div className={cl.wrapper}>
       <h2 className={cl.header}>Вход</h2>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} autoComplete="off">
         <div className={cl.inputWrapper}>
           <label htmlFor="login" className={cl.label}>Логин:</label>
           <input
@@ -30,6 +30,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             onChange={(e) => setLoginValue(e.target.value)}
             required
             className={cl.input}
+            
           />
         </div>
         <div className={cl.inputWrapper}>

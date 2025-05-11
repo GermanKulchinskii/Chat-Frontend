@@ -96,7 +96,7 @@ const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
     }
     lastCombinedMessagesCountRef.current = combinedMessages.length;
   }, [combinedMessages]);
-
+  
   return (
     <div className={cl.wrapper} ref={wrapperRef}>
       <div className={cl.sentinel} ref={observerRef} />
@@ -105,10 +105,10 @@ const MessagesWrapper: React.FC<ChatMessagesProps> = (props) => {
           <Message
             key={message.id ? `${message.id}-${index}` : `msg-${index}`}
             {...message}
-            isOwn={message.senderId === currentUserId}
+            isOwn={message.senderId === currentUserId || message.sender_id === currentUserId}
             senderName={
-              isChatId && message.senderId !== currentUserId
-                ? members?.find((member) => member.id === message.senderId)?.username
+              isChatId && message?.senderId !== currentUserId && message?.sender_id !== currentUserId
+                ? members?.find((member) => member.id === message.senderId || member.id === message.sender_id)?.username
                 : undefined
             }
           />
